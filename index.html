@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitOS">
+<meta name="theme-color" content="#080808">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<title>FitOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Cormorant+Garamond:ital,wght@1,400;1,600&family=Urbanist:ital,wght@1,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808;--bg2:#0f0f0f;--surface:#1a1a1a;--surface2:#222;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --red:#e8394a;--red2:#ff6b7a;--red-dim:rgba(232,57,74,0.08);
+  --text:#f0ede8;--text2:#8a8780;--text3:#484644;
+  --green:#3de8a0;--amber:#f0a742;
+  --pro:#8b5cf6;--carb:#3b82f6;--fat:#e8894a;
+  --sans:'Montserrat',sans-serif;--display:'Cormorant Garamond',serif;
+  --nav-h:68px;--safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;overflow:hidden;}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--sans);
+  height:100%;overflow:hidden;font-size:14px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.5;}
+.glow{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;}
+.glow-top{width:400px;height:300px;background:radial-gradient(ellipse,rgba(160,20,40,0.22) 0%,transparent 70%);top:-100px;left:50%;transform:translateX(-50%);}
+
+/* APP SHELL */
+.app{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
+
+/* ── TOPBAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:calc(var(--safe-top) + 12px) 20px 12px;
+  background:rgba(8,8,8,0.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;z-index:50;
+}
+.logo svg{display:block;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.phase-badge{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:var(--red-dim);color:var(--red2);border:1px solid rgba(232,57,74,0.2);}
+.user-chip{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2);font-weight:500;}
+.user-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);flex-shrink:0;}
+
+/* ── SCROLL AREA ── */
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;padding-bottom:calc(var(--nav-h) + var(--safe-bottom) + 16px);}
+.scroll-area::-webkit-scrollbar{display:none;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(10,10,10,0.95);backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:stretch;
+  padding-bottom:var(--safe-bottom);
+  z-index:100;height:calc(var(--nav-h) + var(--safe-bottom));
+}
+.nav-tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;padding:10px 4px;cursor:pointer;
+  border:none;background:transparent;color:var(--text3);
+  transition:color 0.2s;position:relative;
+}
+.nav-tab.active{color:var(--red);}
+.nav-tab-icon{font-size:20px;line-height:1;transition:transform 0.2s;}
+.nav-tab.active .nav-tab-icon{transform:scale(1.1);}
+.nav-tab-label{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.nav-tab-dot{position:absolute;top:8px;width:4px;height:4px;border-radius:50%;background:var(--red);opacity:0;transition:opacity 0.2s;}
+.nav-tab.active .nav-tab-dot{opacity:1;}
+
+/* ── PAGES ── */
+.page{display:none;padding:20px 16px 8px;}
+.page.active{display:block;animation:pageIn 0.38s cubic-bezier(0.22,1,0.36,1) both;}
+@keyframes pageIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── PAGE HEADER ── */
+.page-tag{font-size:9px;font-weight:700;color:var(--red);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px;}
+.page-title{font-family:var(--display);font-size:36px;font-weight:400;font-style:italic;line-height:1.05;color:var(--text);margin-bottom:6px;}
+.page-title span{color:var(--red);}
+.page-sub{font-size:11px;color:var(--text2);font-weight:400;margin-bottom:20px;line-height:1.5;}
+
+/* ── SECTION TABS (sub navigation) ── */
+.section-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+.section-tabs::-webkit-scrollbar{display:none;}
+.stab{flex-shrink:0;font-size:10px;font-weight:700;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all 0.15s;letter-spacing:0.04em;white-space:nowrap;}
+.stab.active{background:var(--red-dim);color:var(--red2);border-color:rgba(232,57,74,0.3);}
+
+/* ── SUBPANEL ── */
+.subpanel{display:none;}
+.subpanel.active{display:block;animation:pageIn 0.28s cubic-bezier(0.22,1,0.36,1) both;}
+
+/* ── METRICS ── */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;}
+.mc-label{font-size:8px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:7px;}
+.mc-value{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1;}
+.mc-unit{font-size:11px;font-weight:500;color:var(--text2);}
+.mc-sub{font-size:9px;color:var(--text3);margin-top:4px;font-weight:500;}
+.mc-pro{border-color:rgba(139,92,246,0.3)!important;background:rgba(139,92,246,0.07)!important;}
+.mc-pro .mc-value{color:var(--pro);}
+.mc-carb{border-color:rgba(59,130,246,0.3)!important;background:rgba(59,130,246,0.07)!important;}
+.mc-carb .mc-value{color:var(--carb);}
+.mc-fat{border-color:rgba(232,137,74,0.3)!important;background:rgba(232,137,74,0.07)!important;}
+.mc-fat .mc-value{color:var(--fat);}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px;}
+.card-header{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:9px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);}
+.card-body{padding:16px;}
+
+/* ── BADGE ── */
+.badge{font-size:8px;font-weight:700;padding:3px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.07em;}
+.badge-push{background:rgba(74,158,255,0.1);color:#4a9eff;border:1px solid rgba(74,158,255,0.2);}
+.badge-pull{background:rgba(61,232,160,0.08);color:var(--green);border:1px solid rgba(61,232,160,0.18);}
+.badge-legs{background:rgba(240,167,66,0.08);color:var(--amber);border:1px solid rgba(240,167,66,0.2);}
+.badge-opt{background:rgba(232,57,74,0.08);color:var(--red2);border:1px solid rgba(232,57,74,0.18);}
+.badge-rest{background:rgba(255,255,255,0.04);color:var(--text3);border:1px solid var(--border);}
+
+/* ── EXERCISE LIST (mobile-friendly) ── */
+.ex-item{padding:12px 0;border-bottom:1px solid var(--border);}
+.ex-item:last-child{border-bottom:none;}
+.ex-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.ex-item-name{font-size:13px;font-weight:700;color:var(--text);}
+.ex-item-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:3px;background:var(--surface);color:var(--text2);border:1px solid var(--border);}
+.ex-item-note{font-size:10px;color:var(--text3);font-weight:500;}
+.ex-item-rest{font-size:9px;color:var(--text3);font-weight:600;margin-top:2px;}
+
+/* ── TIP ── */
+.tip{position:relative;background:#03030a;border:1px solid rgba(255,255,255,0.16);border-radius:14px;padding:14px 16px;margin-bottom:10px;overflow:hidden;}
+.tip::before{content:'';position:absolute;inset:0;background-image:radial-gradient(1px 1px at 8% 20%,rgba(255,255,255,0.5) 0%,transparent 100%),radial-gradient(1px 1px at 25% 65%,rgba(255,255,255,0.38) 0%,transparent 100%),radial-gradient(1.2px 1.2px at 42% 12%,rgba(255,255,255,0.55) 0%,transparent 100%),radial-gradient(1px 1px at 58% 80%,rgba(255,255,255,0.32) 0%,transparent 100%),radial-gradient(1px 1px at 72% 35%,rgba(255,255,255,0.45) 0%,transparent 100%),radial-gradient(1.2px 1.2px at 85% 55%,rgba(255,255,255,0.4) 0%,transparent 100%),radial-gradient(1px 1px at 92% 18%,rgba(255,255,255,0.35) 0%,transparent 100%),radial-gradient(1px 1px at 15% 88%,rgba(255,255,255,0.28) 0%,transparent 100%);pointer-events:none;z-index:0;}
+.tip-tag,.tip-text{position:relative;z-index:1;}
+.tip-tag{font-size:8px;font-weight:800;color:rgba(255,255,255,0.95);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:5px;}
+.tip-text{font-size:12px;color:rgba(255,255,255,0.42);line-height:1.7;font-weight:400;}
+
+/* ── WEEK GRID ── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px;}
+.day-cell{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 3px;text-align:center;}
+.day-cell.training{border-color:rgba(232,57,74,0.22);background:var(--red-dim);}
+.day-name{font-size:7px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:5px;}
+.day-type{font-size:9px;font-weight:700;color:var(--text3);}
+.day-cell.training .day-type{color:var(--red2);}
+
+/* ── MEAL CARD ── */
+.meal-card{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:13px 15px;margin-bottom:8px;}
+.meal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.meal-time{font-size:8px;font-weight:800;color:var(--red2);letter-spacing:0.1em;text-transform:uppercase;}
+.meal-kcal{font-size:8px;font-weight:600;color:var(--text3);}
+.meal-name{font-family:var(--display);font-size:17px;font-weight:400;font-style:italic;margin-bottom:3px;}
+.meal-items{font-size:11px;color:var(--text2);line-height:1.6;}
+
+/* ── MACROS ── */
+.macro-section{background:var(--surface);border-radius:12px;padding:14px;margin-bottom:12px;}
+.macro-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.macro-row:last-child{margin-bottom:0;}
+.macro-lbl{width:72px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;}
+.lbl-pro{color:var(--pro);}.lbl-carb{color:var(--carb);}.lbl-fat{color:var(--fat);}
+.macro-track{flex:1;height:3px;background:#151515;border-radius:2px;overflow:hidden;}
+.macro-fill{height:100%;border-radius:2px;}
+.fill-p{background:linear-gradient(90deg,#6d28d9,var(--pro));}
+.fill-c{background:linear-gradient(90deg,#1d4ed8,var(--carb));}
+.fill-f{background:linear-gradient(90deg,#b85c20,var(--fat));}
+.macro-val{width:34px;text-align:right;font-size:10px;font-weight:700;}
+.v-pro{color:var(--pro);}.v-carb{color:var(--carb);}.v-fat{color:var(--fat);}
+
+/* ── PHASE CARDS ── */
+.phase-card{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--red),transparent);opacity:0.6;}
+.phase-num{font-size:8px;font-weight:800;color:var(--red);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px;}
+.phase-title{font-family:'Urbanist',sans-serif;font-size:17px;font-weight:800;font-style:italic;margin-bottom:3px;}
+.phase-weeks{font-size:8px;font-weight:700;color:var(--text3);letter-spacing:0.06em;margin-bottom:8px;text-transform:uppercase;}
+.phase-desc{font-size:11px;color:var(--text2);line-height:1.65;}
+
+/* ── PROGRESS BAR (sidebar-style at bottom) ── */
+.prog-row{display:flex;align-items:center;gap:10px;padding:14px 0;border-top:1px solid var(--border);margin-top:4px;}
+.prog-label{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;flex-shrink:0;}
+.prog-track{flex:1;height:2px;background:var(--surface2);border-radius:2px;}
+.prog-fill{height:100%;width:8%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--red2));}
+.prog-val{font-size:9px;font-weight:700;color:var(--text2);flex-shrink:0;}
+
+/* ══════════════════
+   TRACKER STYLES
+══════════════════ */
+/* Day selector pills */
+.day-pills{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.day-pills::-webkit-scrollbar{display:none;}
+.day-pill{flex-shrink:0;font-size:10px;font-weight:700;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.day-pill.active{background:var(--red-dim);color:var(--red2);border-color:rgba(232,57,74,0.3);}
+
+/* Exercise log */
+.ex-log-header{display:grid;grid-template-columns:1fr 58px 52px 52px 28px;gap:5px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.ex-log-row{display:grid;grid-template-columns:1fr 58px 52px 52px 28px;gap:5px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.ex-log-row:last-child{border-bottom:none;}
+.ex-log-lbl{font-size:7px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;text-align:center;}
+.ex-log-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;}
+.ex-log-input{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 4px;font-family:var(--sans);font-size:11px;font-weight:700;color:var(--text);text-align:center;width:100%;outline:none;-webkit-appearance:none;}
+.ex-log-input:focus{border-color:var(--red);}
+.ex-log-del{background:none;border:none;color:var(--text3);font-size:16px;padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* Add ex row */
+.add-row{display:flex;gap:8px;margin-top:12px;}
+.add-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;}
+.add-input:focus{border-color:var(--red);}
+.add-btn{background:var(--red);color:white;border:none;border-radius:10px;padding:10px 14px;font-family:var(--sans);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+
+/* Save button */
+.save-btn{background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:8px;padding:12px 24px;font-family:var(--sans);font-size:9px;font-weight:600;cursor:pointer;letter-spacing:0.18em;text-transform:uppercase;margin-top:14px;display:inline-block;transition:all 0.2s;width:100%;text-align:center;}
+.save-btn:active{border-color:rgba(255,255,255,0.35);color:var(--text);}
+.saved-toast{display:none;font-size:11px;color:var(--green);font-weight:600;margin-top:8px;text-align:center;}
+
+/* History item */
+.hist-item{padding:12px 0;border-bottom:1px solid var(--border);}
+.hist-item:last-child{border-bottom:none;}
+.hist-top{display:flex;justify-content:space-between;margin-bottom:6px;}
+.hist-day{font-size:12px;font-weight:700;color:var(--text);}
+.hist-date{font-size:10px;color:var(--text3);font-weight:600;}
+.hist-ex{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);padding:2px 0;}
+.hist-ex-val{font-weight:700;color:var(--text);}
+
+/* Water */
+.water-display{text-align:center;margin-bottom:16px;}
+.water-drop-wrap{display:flex;justify-content:center;margin-bottom:18px;}
+.water-pct{font-size:9px;font-weight:700;color:#60a5fa;letter-spacing:0.06em;text-align:center;margin-bottom:14px;}
+.water-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.water-btn{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 8px;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;text-align:center;transition:all 0.15s;-webkit-appearance:none;}
+.water-btn:active{background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.35);color:#60a5fa;}
+.water-reset{background:none;border:none;font-family:var(--sans);font-size:9px;font-weight:600;color:var(--text3);cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;display:block;width:100%;text-align:center;padding:8px 0;margin-bottom:4px;}
+
+/* Water chart */
+.water-chart{display:flex;align-items:flex-end;gap:6px;height:110px;margin-bottom:6px;}
+.wc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.wc-val{font-size:7px;font-weight:700;color:#60a5fa;min-height:11px;text-align:center;}
+.wc-track{width:100%;background:var(--surface);border-radius:4px 4px 2px 2px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;position:relative;}
+.wc-fill{width:100%;background:linear-gradient(180deg,#60a5fa,#1d4ed8);border-radius:4px 4px 0 0;height:0;transition:height 1s cubic-bezier(0.34,1.1,0.64,1);}
+.wc-lbl{font-size:7px;font-weight:700;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;}
+
+/* Reminder */
+.reminder-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-top:1px solid var(--border);margin-top:4px;}
+.reminder-info .ri-label{font-size:10px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;}
+.reminder-info .ri-sub{font-size:9px;color:rgba(255,255,255,0.42);font-weight:400;margin-top:2px;}
+.toggle{width:40px;height:24px;background:var(--surface2);border-radius:12px;cursor:pointer;position:relative;transition:background 0.2s;border:1px solid var(--border);outline:none;flex-shrink:0;}
+.toggle.on{background:#60a5fa;border-color:#60a5fa;}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;left:2px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.toggle.on::after{transform:translateX(16px);}
+
+/* Custom plan */
+.custom-ex-row{display:grid;grid-template-columns:1fr 32px;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.custom-ex-row:last-child{border-bottom:none;}
+.custom-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:12px;color:var(--text);outline:none;width:100%;-webkit-appearance:none;}
+.custom-input:focus{border-color:var(--red);}
+
+/* Week strip */
+.week-strip{display:flex;border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:16px;}
+.wsd{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px 3px;cursor:pointer;transition:all 0.2s;position:relative;border-right:1px solid var(--border);}
+.wsd:last-child{border-right:none;}
+.wsd.on{background:var(--red-dim);}
+.wsd-name{font-size:7px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+.wsd.on .wsd-name{color:var(--red2);}
+.wsd-dot{width:5px;height:5px;border-radius:50%;border:1.5px solid var(--text3);transition:all 0.2s;}
+.wsd.on .wsd-dot{background:var(--red);border-color:var(--red);}
+.wsd-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:transparent;transition:background 0.2s;}
+.wsd.on .wsd-bar{background:var(--red);}
+
+/* Divider */
+.section-divider{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.14em;text-transform:uppercase;padding:16px 0 8px;}
+
+/* Empty state */
+.empty-state{text-align:center;padding:28px 0;font-size:12px;color:var(--text3);}
+
+/* ── ANIMATIONS ── */
+@keyframes shellIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.app{animation:shellIn 0.55s cubic-bezier(0.22,1,0.36,1) both;}
+</style>
+</head>
+<body>
+<div class="glow glow-top"></div>
+
+<div class="app">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="logo" href="#">
+    <svg width="90" height="26" viewBox="0 0 124 34" fill="none">
+      <text x="0" y="26" font-family="Montserrat,sans-serif" font-weight="900" font-size="28" fill="white" letter-spacing="-1">FIT</text>
+      <circle cx="69" cy="16" r="10" fill="none" stroke="#e8394a" stroke-width="3"/>
+      <path d="M69 6 A10 10 0 1 1 65.6 25.4" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="65.6" cy="25.4" r="2.5" fill="#e8394a"/>
+      <text x="83" y="26" font-family="Montserrat,sans-serif" font-weight="900" font-size="28" fill="white" letter-spacing="-1">S</text>
+    </svg>
+  </a>
+  <div class="topbar-right">
+    <span class="phase-badge">Fase 1</span>
+    <div class="user-chip"><span class="user-dot"></span>Davide</div>
+  </div>
+</header>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area" id="scroll-area">
+
+  <!-- ══════════ PAGE: OVERVIEW ══════════ -->
+  <div class="page active" id="page-overview">
+    <div class="page-tag">Dashboard · Sistema attivo</div>
+    <h1 class="page-title">Il tuo piano per<br><span>aumentare la massa</span></h1>
+    <p class="page-sub">Push/Pull/Legs · 3–4 giorni/sett · Ore 6:40</p>
+
+    <div class="metrics-grid">
+      <div class="metric-card"><div class="mc-label">Peso</div><div class="mc-value">64 <span class="mc-unit">kg</span></div><div class="mc-sub">+0.5–1 kg/mese</div></div>
+      <div class="metric-card"><div class="mc-label">Calorie</div><div class="mc-value">2750 <span class="mc-unit">kcal</span></div><div class="mc-sub">+250 surplus</div></div>
+      <div class="metric-card"><div class="mc-label">Proteine</div><div class="mc-value">145 <span class="mc-unit">g</span></div><div class="mc-sub">2.3g/kg corporeo</div></div>
+      <div class="metric-card"><div class="mc-label">Durata</div><div class="mc-value">12 <span class="mc-unit">sett</span></div><div class="mc-sub">4 fasi progressive</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Settimana tipo</span><span class="badge badge-rest">3–4 giorni</span></div>
+      <div class="card-body">
+        <div class="week-grid">
+          <div class="day-cell training"><div class="day-name">Lun</div><div class="day-type">Push</div></div>
+          <div class="day-cell"><div class="day-name">Mar</div><div class="day-type">–</div></div>
+          <div class="day-cell training"><div class="day-name">Mer</div><div class="day-type">Pull</div></div>
+          <div class="day-cell"><div class="day-name">Gio</div><div class="day-type">–</div></div>
+          <div class="day-cell training"><div class="day-name">Ven</div><div class="day-type">Legs</div></div>
+          <div class="day-cell"><div class="day-name">Sab</div><div class="day-type">–</div></div>
+          <div class="day-cell" style="border-color:rgba(232,57,74,0.15);background:rgba(232,57,74,0.03)"><div class="day-name">Dom</div><div class="day-type" style="color:var(--red);font-size:8px;">+Up</div></div>
+        </div>
+        <div class="tip" style="margin-bottom:0"><div class="tip-tag">Orario 6:40</div><div class="tip-text">Mangia 20–30 min prima (ore 6:10). Banana + gallette + miele + caffè. Riscaldamento 8–10 min sempre incluso.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Parametri</span></div>
+      <div class="card-body">
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">Età</span><span style="font-size:14px;font-weight:800;">21 anni</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">Altezza</span><span style="font-size:14px;font-weight:800;">1.76 m</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">Peso</span><span style="font-size:14px;font-weight:800;">64 kg</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">BMI</span><span style="font-size:14px;font-weight:800;color:var(--green);">20.7 ✓</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">TDEE</span><span style="font-size:14px;font-weight:800;">~2500 kcal</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip"><div class="tip-tag">Progressione lineare</div><div class="tip-text">Ogni sessione: +1 ripetizione o +1.25 kg. Annota sempre i carichi. Senza progressione, niente crescita.</div></div>
+    <div class="tip"><div class="tip-tag">Recupero = crescita</div><div class="tip-text">7–8h di sonno. Coricarsi entro le 23:00. Il muscolo cresce a riposo, non in palestra.</div></div>
+
+    <div class="prog-row">
+      <span class="prog-label">Settimana</span>
+      <div class="prog-track"><div class="prog-fill"></div></div>
+      <span class="prog-val">1 / 12</span>
+    </div>
+  </div>
+
+  <!-- ══════════ PAGE: ALLENAMENTO ══════════ -->
+  <div class="page" id="page-allenamento">
+    <div class="page-tag">Piano · Allenamento</div>
+    <h1 class="page-title">I tuoi<br><span>allenamenti</span></h1>
+
+    <div class="section-tabs" id="workout-tabs">
+      <div class="stab active" onclick="switchSubPanel('workout','push',this)">Push</div>
+      <div class="stab" onclick="switchSubPanel('workout','pull',this)">Pull</div>
+      <div class="stab" onclick="switchSubPanel('workout','legs',this)">Legs</div>
+      <div class="stab" onclick="switchSubPanel('workout','upper',this)">Upper +</div>
+    </div>
+
+    <!-- PUSH -->
+    <div class="subpanel active" id="workout-push">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Petto · Spalle · Tricipiti</span><span class="badge badge-push">Push</span></div>
+        <div class="card-body">
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Panca piana multipower</span><span class="ex-item-pill">3×8–10</span></div><div class="ex-item-note">Smith machine · focus tecnica</div><div class="ex-item-rest">Recupero: 2 min</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Panca inclinata 30°</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Manubri · enfasi clavicolare</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Shoulder press manubri</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Seduto · controllo eccentrica</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Alzate laterali cavi</span><span class="ex-item-pill">3×12–15</span></div><div class="ex-item-note">Tensione costante sul deltoide</div><div class="ex-item-rest">Recupero: 60 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Push-down cavo (corda)</span><span class="ex-item-pill">3×12–15</span></div><div class="ex-item-note">Isolamento tricipite</div><div class="ex-item-rest">Recupero: 60 s</div></div>
+        </div>
+      </div>
+      <div class="tip"><div class="tip-tag">Panca multipower</div><div class="tip-text">Barra alla linea capezzoli. Discesa lenta 2–3 sec. Prima della panca: 2 serie vuote + 1 serie al 50%.</div></div>
+    </div>
+
+    <!-- PULL -->
+    <div class="subpanel" id="workout-pull">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Schiena · Bicipiti · Post. spalla</span><span class="badge badge-pull">Pull</span></div>
+        <div class="card-body">
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Pulldown lat machine</span><span class="ex-item-pill">4×8–10</span></div><div class="ex-item-note">Presa larga o neutra</div><div class="ex-item-rest">Recupero: 2 min</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Rematore macchinario</span><span class="ex-item-pill">3×8–10</span></div><div class="ex-item-note">Schiena piatta · tirata al petto</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Face pull cavo</span><span class="ex-item-pill">3×15</span></div><div class="ex-item-note">Salute cuffia dei rotatori</div><div class="ex-item-rest">Recupero: 60 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Curl bilanciere EZ</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Gomiti fissi · ROM completo</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Curl martello manubri</span><span class="ex-item-pill">2×12</span></div><div class="ex-item-note">Brachiale + brachioradiale</div><div class="ex-item-rest">Recupero: 60 s</div></div>
+        </div>
+      </div>
+      <div class="tip"><div class="tip-tag">Lat machine</div><div class="tip-text">Inizia il pull con le scapole. Immagina di schiacciare un arancio sotto le ascelle a fine movimento.</div></div>
+    </div>
+
+    <!-- LEGS -->
+    <div class="subpanel" id="workout-legs">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Quad · Femorali · Glutei · Polpacci</span><span class="badge badge-legs">Legs</span></div>
+        <div class="card-body">
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Squat multipower</span><span class="ex-item-pill">4×8–10</span></div><div class="ex-item-note">Smith machine · depth al parallelo</div><div class="ex-item-rest">Recupero: 2–3 min</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Leg press 45°</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Piedi alti = femorali + glutei</div><div class="ex-item-rest">Recupero: 2 min</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Leg curl seduto</span><span class="ex-item-pill">4×10–12</span></div><div class="ex-item-note">Eccentrica lenta 3 sec</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Leg extension</span><span class="ex-item-pill">3×12</span></div><div class="ex-item-note">Pausa 1 sec in contrazione</div><div class="ex-item-rest">Recupero: 60 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Calf raise in piedi</span><span class="ex-item-pill">4×15–20</span></div><div class="ex-item-note">Pausa 1 sec in basso e in alto</div><div class="ex-item-rest">Recupero: 45 s</div></div>
+        </div>
+      </div>
+      <div class="tip"><div class="tip-tag">Squat multipower</div><div class="tip-text">Piedi leggermente avanti. Ginocchia in linea con le dita. Prime 4 settimane: tecnica pura, niente peso extra.</div></div>
+    </div>
+
+    <!-- UPPER -->
+    <div class="subpanel" id="workout-upper">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Upper Body · Solo se recuperato</span><span class="badge badge-opt">4° giorno</span></div>
+        <div class="card-body">
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Panca inclinata manubri</span><span class="ex-item-pill">3×10</span></div><div class="ex-item-note">Variante push · petto alto</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Lat machine presa stretta</span><span class="ex-item-pill">3×10</span></div><div class="ex-item-note">Spessore schiena</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Arnold press</span><span class="ex-item-pill">3×12</span></div><div class="ex-item-note">Spalle complete con rotazione</div><div class="ex-item-rest">Recupero: 90 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Cable curl cavo basso</span><span class="ex-item-pill">3×12</span></div><div class="ex-item-note">Tensione costante bicipite</div><div class="ex-item-rest">Recupero: 60 s</div></div>
+          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">French press manubri</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Tricipite da supino</div><div class="ex-item-rest">Recupero: 75 s</div></div>
+        </div>
+      </div>
+      <div class="tip"><div class="tip-tag">Quando farlo</div><div class="tip-text">Solo se hai dormito bene e non sei indolenzito. In caso di dubbio, salta e recupera.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════ PAGE: NUTRIZIONE ══════════ -->
+  <div class="page" id="page-nutrizione">
+    <div class="page-tag">Nutrizione · Bulk pulito</div>
+    <h1 class="page-title">Piano<br><span>alimentare</span></h1>
+
+    <div class="section-tabs">
+      <div class="stab active" onclick="switchSubPanel('nutri','pasti',this)">Pasti</div>
+      <div class="stab" onclick="switchSubPanel('nutri','macro',this)">Macronutrienti</div>
+      <div class="stab" onclick="switchSubPanel('nutri','progressione',this)">Progressione</div>
+      <div class="stab" onclick="switchSubPanel('nutri','consigli',this)">Consigli</div>
+    </div>
+
+    <!-- PASTI -->
+    <div class="subpanel active" id="nutri-pasti">
+      <div class="meal-card"><div class="meal-top"><span class="meal-time">06:10 — Pre-Workout</span><span class="meal-kcal">~300 kcal</span></div><div class="meal-name">Pasto pre-allenamento</div><div class="meal-items">Banana · gallette di riso · miele · caffè nero</div></div>
+      <div class="meal-card"><div class="meal-top"><span class="meal-time">08:15 — Post-Workout</span><span class="meal-kcal">~680 kcal</span></div><div class="meal-name">Colazione ricca</div><div class="meal-items">4 uova intere · 80g avena · 150g yogurt greco 0% · frutta fresca</div></div>
+      <div class="meal-card"><div class="meal-top"><span class="meal-time">12:30 — Pranzo</span><span class="meal-kcal">~650 kcal</span></div><div class="meal-name">Pasto principale</div><div class="meal-items">150g pollo / merluzzo / tonno · 100g riso o pasta integrale · verdure · olio EVO</div></div>
+      <div class="meal-card"><div class="meal-top"><span class="meal-time">16:30 — Spuntino</span><span class="meal-kcal">~420 kcal</span></div><div class="meal-name">Snack proteico</div><div class="meal-items">200g ricotta · 30g frutta secca · 1 frutto</div></div>
+      <div class="meal-card"><div class="meal-top"><span class="meal-time">20:00 — Cena</span><span class="meal-kcal">~700 kcal</span></div><div class="meal-name">Secondo pasto</div><div class="meal-items">150g carne magra / salmone / uova · 200g patate o legumi · insalata · olio EVO</div></div>
+      <div class="tip"><div class="tip-tag">Giorni di riposo</div><div class="tip-text">Riduci i carboidrati di 60–80g. Mantieni proteine e grassi invariati.</div></div>
+    </div>
+
+    <!-- MACROS -->
+    <div class="subpanel" id="nutri-macro">
+      <div class="metrics-grid">
+        <div class="metric-card" style="grid-column:1/-1"><div class="mc-label">Calorie totali</div><div class="mc-value">2750 <span class="mc-unit">kcal</span></div><div class="mc-sub">Surplus +250 kcal · TDEE ~2500</div></div>
+        <div class="metric-card mc-pro"><div class="mc-label">Proteine</div><div class="mc-value">145 <span class="mc-unit">g</span></div><div class="mc-sub">21% · 580 kcal</div></div>
+        <div class="metric-card mc-carb"><div class="mc-label">Carboidrati</div><div class="mc-value">380 <span class="mc-unit">g</span></div><div class="mc-sub">55% · 1520 kcal</div></div>
+        <div class="metric-card mc-fat" style="grid-column:1/-1"><div class="mc-label">Grassi</div><div class="mc-value">75 <span class="mc-unit">g</span></div><div class="mc-sub">24% · 675 kcal</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Distribuzione</span></div>
+        <div class="card-body">
+          <div class="macro-section">
+            <div class="macro-row"><span class="macro-lbl lbl-pro">Proteine</span><div class="macro-track"><div class="macro-fill fill-p" style="width:21%"></div></div><span class="macro-val v-pro">145g</span></div>
+            <div class="macro-row"><span class="macro-lbl lbl-carb">Carboidrati</span><div class="macro-track"><div class="macro-fill fill-c" style="width:55%"></div></div><span class="macro-val v-carb">380g</span></div>
+            <div class="macro-row"><span class="macro-lbl lbl-fat">Grassi</span><div class="macro-track"><div class="macro-fill fill-f" style="width:24%"></div></div><span class="macro-val v-fat">75g</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tip" style="border-color:rgba(139,92,246,0.4)"><div class="tip-tag">Proteine</div><div class="tip-text">Pollo, tacchino, tonno, merluzzo, salmone, uova, ricotta, yogurt greco, carne magra, legumi.</div></div>
+      <div class="tip" style="border-color:rgba(59,130,246,0.4)"><div class="tip-tag">Carboidrati</div><div class="tip-text">Riso, pasta integrale, avena, patate, frutta. Concentra i carbo pre e post workout.</div></div>
+      <div class="tip" style="border-color:rgba(232,137,74,0.4)"><div class="tip-tag">Grassi</div><div class="tip-text">Olio EVO, avocado, frutta secca, uova, salmone. Non scendere sotto i 60g — supportano il testosterone.</div></div>
+    </div>
+
+    <!-- PROGRESSIONE -->
+    <div class="subpanel" id="nutri-progressione">
+      <div class="phase-card"><div class="phase-num">Fase 01</div><div class="phase-title">Adattamento neuromuscolare</div><div class="phase-weeks">Settimane 1–4</div><div class="phase-desc">Focus tecnica. Carichi moderati (RPE 6–7). Non andare a cedimento. Costruisci le fondamenta.</div></div>
+      <div class="phase-card"><div class="phase-num">Fase 02</div><div class="phase-title">Progressione dei carichi</div><div class="phase-weeks">Settimane 5–8</div><div class="phase-desc">+1.25–2.5 kg ogni volta che completi tutte le rip. RPE 7–8. Puoi avvicinarti al cedimento.</div></div>
+      <div class="phase-card"><div class="phase-num">Fase 03</div><div class="phase-title">Overreaching controllato</div><div class="phase-weeks">Settimane 9–11</div><div class="phase-desc">+1 serie per esercizio principale. Volume alto, recuperi ridotti. RPE 8–9 negli ultimi set.</div></div>
+      <div class="phase-card"><div class="phase-num">Fase 04</div><div class="phase-title">Deload — scarico attivo</div><div class="phase-weeks">Settimana 12</div><div class="phase-desc">Riduci carichi del 40–50%. Il muscolo cresce nel recupero. Poi ripeti con carichi più alti.</div></div>
+      <div class="tip"><div class="tip-tag">Regola d'oro</div><div class="tip-text">Annota peso, serie e ripetizioni ogni sessione. +1 rip. o +1.25 kg rispetto alla precedente. Sempre.</div></div>
+    </div>
+
+    <!-- CONSIGLI -->
+    <div class="subpanel" id="nutri-consigli">
+      <div class="tip"><div class="tip-tag">Pre-workout 6:10</div><div class="tip-text">Corpo in deficit glicemico al mattino. Senza carbo rischi cali di forza. Banana + gallette = soluzione rapida.</div></div>
+      <div class="tip"><div class="tip-tag">Riscaldamento (mai saltarlo)</div><div class="tip-text">5 min cardio + mobilità + 2 serie al 40–50% del carico. Al mattino le articolazioni sono più rigide.</div></div>
+      <div class="tip"><div class="tip-tag">Sonno — il terzo pilastro</div><div class="tip-text">A letto entro le 23:00. Il GH viene secreto nelle prime ore di sonno profondo. Meno di 7h = meno massa.</div></div>
+      <div class="tip"><div class="tip-tag">Idratazione</div><div class="tip-text">500ml appena sveglio. Disidratazione del 1–2% riduce la forza. Target: 2.5–3 litri/giorno.</div></div>
+      <div class="tip"><div class="tip-tag">Tecnica prima dei carichi</div><div class="tip-text">Prime 4 settimane: usa carichi con cui potresti fare 5 rip. in più. Un infortunio ti ferma settimane.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════ PAGE: PROGRESSI ══════════ -->
+  <div class="page" id="page-progressi">
+    <div class="page-tag">Tracker · Sessione</div>
+    <h1 class="page-title">Traccia i<br><span>progressi</span></h1>
+
+    <div class="day-pills" id="log-pills">
+      <div class="day-pill active" onclick="selectLogDay('push',this)">Push Day</div>
+      <div class="day-pill" onclick="selectLogDay('pull',this)">Pull Day</div>
+      <div class="day-pill" onclick="selectLogDay('legs',this)">Leg Day</div>
+      <div class="day-pill" onclick="selectLogDay('upper',this)">Upper Day</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="log-day-title">Push Day</span>
+        <span id="log-date" style="font-size:9px;color:var(--text3);font-weight:600;"></span>
+      </div>
+      <div class="card-body">
+        <div class="ex-log-header">
+          <div class="ex-log-lbl" style="text-align:left;">Esercizio</div>
+          <div class="ex-log-lbl">Kg</div>
+          <div class="ex-log-lbl">Serie</div>
+          <div class="ex-log-lbl">Rip.</div>
+          <div></div>
+        </div>
+        <div id="ex-log-list"></div>
+        <div class="add-row">
+          <input class="add-input" id="new-ex-name" placeholder="Aggiungi esercizio..." type="text" inputmode="text">
+          <button class="add-btn" onclick="addLogEx()">+</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" onclick="saveSession()">Salva sessione</button>
+    <div class="saved-toast" id="saved-toast">✓ Sessione salvata</div>
+
+    <div class="section-divider">Storico sessioni</div>
+    <div class="card">
+      <div class="card-body" id="history-list">
+        <div class="empty-state">Nessuna sessione ancora.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PAGE: IDRATAZIONE ══════════ -->
+  <div class="page" id="page-idratazione">
+    <div class="page-tag">Tracker · Idratazione</div>
+    <h1 class="page-title">Fabbisogno<br><span>idrico</span></h1>
+    <p class="page-sub">Target: 2500 ml/giorno</p>
+
+    <div class="water-drop-wrap">
+      <svg id="water-drop-svg" width="140" height="168" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="dropClip">
+            <path d="M75,8 C75,8 20,75 20,115 C20,145 45,168 75,168 C105,168 130,145 130,115 C130,75 75,8 75,8 Z"/>
+          </clipPath>
+          <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#93c5fd"/>
+            <stop offset="100%" stop-color="#1d4ed8"/>
+          </linearGradient>
+        </defs>
+        <path d="M75,8 C75,8 20,75 20,115 C20,145 45,168 75,168 C105,168 130,145 130,115 C130,75 75,8 75,8 Z" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/>
+        <g clip-path="url(#dropClip)">
+          <rect id="water-fill-rect" x="0" y="168" width="150" height="160" fill="url(#waterGrad)" opacity="0.85"/>
+          <path id="water-wave" fill="rgba(147,197,253,0.6)">
+            <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
+              values="M-10,0 Q20,-8 50,0 Q80,8 110,0 Q140,-8 170,0 L170,30 L-10,30 Z;M-10,0 Q20,8 50,0 Q80,-8 110,0 Q140,8 170,0 L170,30 L-10,30 Z;M-10,0 Q20,-8 50,0 Q80,8 110,0 Q140,-8 170,0 L170,30 L-10,30 Z"/>
+          </path>
+        </g>
+        <text id="drop-ml-text" x="75" y="122" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="22" fill="white">0</text>
+        <text x="75" y="138" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="500" font-size="10" fill="rgba(255,255,255,0.5)">ml</text>
+      </svg>
+    </div>
+
+    <div class="water-pct" id="water-pct">0% del target giornaliero</div>
+
+    <div class="water-btns">
+      <button class="water-btn" onclick="addWater(150)">150 ml</button>
+      <button class="water-btn" onclick="addWater(250)">250 ml</button>
+      <button class="water-btn" onclick="addWater(500)">500 ml</button>
+      <button class="water-btn" onclick="addWater(750)">750 ml</button>
+    </div>
+    <button class="water-reset" onclick="resetWater()">↺ Reset giornaliero</button>
+
+    <div class="section-divider">Andamento settimanale</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="water-chart" id="water-chart"></div>
+        <div style="font-size:8px;color:var(--text3);font-weight:600;text-align:center;letter-spacing:0.06em;text-transform:uppercase;">Ultimi 7 giorni · target 2500 ml</div>
+      </div>
+    </div>
+
+    <div class="reminder-row">
+      <div class="reminder-info">
+        <div class="ri-label">
+          <svg width="17" height="18" viewBox="0 0 13 14" fill="none">
+            <path d="M6.5 1C6.5 1 3 2.5 3 6.5V10H10V6.5C10 2.5 6.5 1 6.5 1Z" stroke="rgba(255,255,255,0.75)" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+            <line x1="5.2" y1="10" x2="7.8" y2="10" stroke="rgba(255,255,255,0.75)" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="6.5" cy="12" r="1" fill="rgba(255,255,255,0.75)"/>
+            <line x1="6.5" y1="0" x2="6.5" y2="1.5" stroke="rgba(255,255,255,0.75)" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Reminder idratazione
+        </div>
+        <div class="ri-sub" id="reminder-sub">Attiva per notifiche ogni 45 min</div>
+      </div>
+      <button class="toggle" id="reminder-toggle" onclick="toggleReminder()"></button>
+    </div>
+  </div>
+
+  <!-- ══════════ PAGE: MODIFICA PIANO ══════════ -->
+  <div class="page" id="page-modifica">
+    <div class="page-tag">Personalizzazione</div>
+    <h1 class="page-title">Modifica il<br><span>piano</span></h1>
+
+    <div class="section-divider">Esercizi</div>
+    <div class="day-pills" id="custom-pills">
+      <div class="day-pill active" onclick="selectCustomDay('push',this)">Push Day</div>
+      <div class="day-pill" onclick="selectCustomDay('pull',this)">Pull Day</div>
+      <div class="day-pill" onclick="selectCustomDay('legs',this)">Leg Day</div>
+      <div class="day-pill" onclick="selectCustomDay('upper',this)">Upper Day</div>
+    </div>
+    <div class="card">
+      <div class="card-body" id="custom-ex-list"></div>
+    </div>
+    <div class="add-row">
+      <input class="add-input" id="custom-new-ex" placeholder="Aggiungi esercizio..." type="text" inputmode="text">
+      <button class="add-btn" onclick="addCustomEx()">+</button>
+    </div>
+    <button class="save-btn" onclick="saveCustomPlan()">Salva piano</button>
+    <div class="saved-toast" id="custom-toast">✓ Piano aggiornato</div>
+
+    <div class="section-divider">Giorni attivi</div>
+    <div class="week-strip" id="active-days-strip"></div>
+    <button class="save-btn" onclick="saveActiveDays()">Salva giorni</button>
+    <div class="saved-toast" id="days-toast">✓ Giorni salvati</div>
+  </div>
+
+</div><!-- end scroll-area -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-tab active" id="nav-overview" onclick="switchPage('overview',this)">
+    <div class="nav-tab-dot"></div>
+    <div class="nav-tab-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="2" y="12" width="5" height="8" rx="1.5" fill="currentColor" opacity="0.5"/>
+        <rect x="8.5" y="7" width="5" height="13" rx="1.5" fill="currentColor" opacity="0.75"/>
+        <rect x="15" y="2" width="5" height="18" rx="1.5" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="nav-tab-label">Piano</div>
+  </button>
+  <button class="nav-tab" id="nav-allenamento" onclick="switchPage('allenamento',this)">
+    <div class="nav-tab-dot"></div>
+    <div class="nav-tab-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="9" width="20" height="4" rx="2" fill="currentColor" opacity="0.4"/>
+        <rect x="5" y="5" width="3" height="12" rx="1.5" fill="currentColor"/>
+        <rect x="14" y="5" width="3" height="12" rx="1.5" fill="currentColor"/>
+        <rect x="0" y="8" width="5" height="6" rx="2" fill="currentColor" opacity="0.6"/>
+        <rect x="17" y="8" width="5" height="6" rx="2" fill="currentColor" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="nav-tab-label">Workout</div>
+  </button>
+  <button class="nav-tab" id="nav-nutrizione" onclick="switchPage('nutrizione',this)">
+    <div class="nav-tab-dot"></div>
+    <div class="nav-tab-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 3C11 3 5 7 5 13C5 16.3 7.7 19 11 19C14.3 19 17 16.3 17 13C17 7 11 3 11 3Z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+        <line x1="11" y1="10" x2="11" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="nav-tab-label">Nutri</div>
+  </button>
+  <button class="nav-tab" id="nav-progressi" onclick="switchPage('progressi',this)">
+    <div class="nav-tab-dot"></div>
+    <div class="nav-tab-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <polyline points="2,16 7,10 11,13 16,5 20,8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="20" cy="8" r="2" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="nav-tab-label">Progressi</div>
+  </button>
+  <button class="nav-tab" id="nav-idratazione" onclick="switchPage('idratazione',this)">
+    <div class="nav-tab-dot"></div>
+    <div class="nav-tab-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 2C11 2 4 9 4 14C4 17.9 7.1 21 11 21C14.9 21 18 17.9 18 14C18 9 11 2 11 2Z" stroke="currentColor" stroke-width="1.8" fill="none"/>
+        <path d="M7 15C7.5 17 9.5 18.5 11 18.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="nav-tab-label">Acqua</div>
+  </button>
+  <button class="nav-tab" id="nav-modifica" onclick="switchPage('modifica',this)">
+    <div class="nav-tab-dot"></div>
+    <div class="nav-tab-icon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M14.5 3.5L18.5 7.5L8 18H4V14L14.5 3.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+        <line x1="12" y1="6" x2="16" y2="10" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="nav-tab-label">Modifica</div>
+  </button>
+</nav>
+
+</div><!-- end app -->
+
+<script>
+// ═══════════════════════════════════
+// PAGE NAVIGATION
+// ═══════════════════════════════════
+let currentPage = 'overview';
+
+function switchPage(pageId, tabEl) {
+  if(currentPage === pageId) return;
+  document.getElementById('page-'+currentPage).classList.remove('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  currentPage = pageId;
+  document.getElementById('page-'+pageId).classList.add('active');
+  tabEl.classList.add('active');
+  document.getElementById('scroll-area').scrollTop = 0;
+  if(pageId==='idratazione'){ updateWaterUI(); setTimeout(renderWaterChart,60); }
+}
+
+// ═══════════════════════════════════
+// SUB-PANEL NAVIGATION
+// ═══════════════════════════════════
+function switchSubPanel(group, panelId, tabEl) {
+  document.querySelectorAll('.subpanel[id^="'+group+'-"]').forEach(p => p.classList.remove('active'));
+  document.getElementById(group+'-'+panelId).classList.add('active');
+  tabEl.closest('.section-tabs').querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+}
+
+// ═══════════════════════════════════
+// EXERCISE LOG
+// ═══════════════════════════════════
+const defaultPlan = {
+  push:['Panca piana multipower','Panca inclinata 30°','Shoulder press manubri','Alzate laterali cavi','Push-down cavo (corda)'],
+  pull:['Pulldown lat machine','Rematore macchinario','Face pull cavo','Curl bilanciere EZ','Curl martello manubri'],
+  legs:['Squat multipower','Leg press 45°','Leg curl seduto','Leg extension','Calf raise in piedi'],
+  upper:['Panca inclinata manubri','Lat machine presa stretta','Arnold press','Cable curl cavo basso','French press manubri']
+};
+let customPlan = JSON.parse(localStorage.getItem('fitos_plan') || 'null') || JSON.parse(JSON.stringify(defaultPlan));
+let sessions = JSON.parse(localStorage.getItem('fitos_sessions') || '[]');
+let currentLogDay = 'push';
+let currentCustomDay = 'push';
+
+function selectLogDay(day, el) {
+  currentLogDay = day;
+  document.querySelectorAll('#log-pills .day-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const names = {push:'Push Day',pull:'Pull Day',legs:'Leg Day',upper:'Upper Day'};
+  document.getElementById('log-day-title').textContent = names[day];
+  renderLogList();
+}
+
+function renderLogList() {
+  const list = document.getElementById('ex-log-list');
+  const exercises = customPlan[currentLogDay] || [];
+  list.innerHTML = exercises.map((ex,i) => `
+    <div class="ex-log-row" id="lrow-${i}">
+      <div class="ex-log-name">${ex}</div>
+      <input class="ex-log-input" type="number" inputmode="decimal" placeholder="–" min="0" step="0.5" id="lkg-${i}"/>
+      <input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lset-${i}"/>
+      <input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lrip-${i}"/>
+      <button class="ex-log-del" onclick="delLogRow(${i})">×</button>
+    </div>
+  `).join('');
+  const d = new Date();
+  document.getElementById('log-date').textContent = d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+}
+
+function delLogRow(i) {
+  const r = document.getElementById('lrow-'+i);
+  if(r) r.remove();
+}
+
+function addLogEx() {
+  const inp = document.getElementById('new-ex-name');
+  const name = inp.value.trim(); if(!name) return;
+  const rows = document.querySelectorAll('#ex-log-list .ex-log-row');
+  const i = rows.length;
+  const row = document.createElement('div');
+  row.className = 'ex-log-row'; row.id = 'lrow-'+i;
+  row.innerHTML = `<div class="ex-log-name">${name}</div><input class="ex-log-input" type="number" inputmode="decimal" placeholder="–" min="0" step="0.5" id="lkg-${i}"/><input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lset-${i}"/><input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lrip-${i}"/><button class="ex-log-del" onclick="delLogRow(${i})">×</button>`;
+  document.getElementById('ex-log-list').appendChild(row);
+  inp.value = '';
+}
+
+function saveSession() {
+  const rows = document.querySelectorAll('#ex-log-list .ex-log-row');
+  const data = [];
+  rows.forEach((row,i) => {
+    const name = row.querySelector('.ex-log-name').textContent;
+    const kg = document.getElementById('lkg-'+i)?.value||'–';
+    const set = document.getElementById('lset-'+i)?.value||'–';
+    const rip = document.getElementById('lrip-'+i)?.value||'–';
+    data.push({name,kg,set,rip});
+  });
+  sessions.unshift({day:currentLogDay,date:new Date().toLocaleDateString('it-IT'),exercises:data});
+  localStorage.setItem('fitos_sessions',JSON.stringify(sessions));
+  renderHistory();
+  const t = document.getElementById('saved-toast');
+  t.style.display='block'; setTimeout(()=>t.style.display='none',2500);
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  const names = {push:'Push Day',pull:'Pull Day',legs:'Leg Day',upper:'Upper Day'};
+  if(!sessions.length) { el.innerHTML='<div class="empty-state">Nessuna sessione ancora.</div>'; return; }
+  el.innerHTML = sessions.slice(0,6).map(s=>`
+    <div class="hist-item">
+      <div class="hist-top">
+        <span class="hist-day">${names[s.day]||s.day}</span>
+        <span class="hist-date">${s.date}</span>
+      </div>
+      ${s.exercises.map(e=>`<div class="hist-ex"><span>${e.name}</span><span class="hist-ex-val">${e.kg}kg · ${e.set}×${e.rip}</span></div>`).join('')}
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════
+// WATER TRACKER
+// ═══════════════════════════════════
+const WATER_TARGET = 2500;
+let waterData = JSON.parse(localStorage.getItem('fitos_water') || '{}');
+let reminderOn = false;
+let reminderInterval = null;
+let currentFillY = 168;
+let animFrameId = null;
+
+function todayKey() { return new Date().toISOString().split('T')[0]; }
+function getTodayWater() { return waterData[todayKey()]||0; }
+
+function addWater(ml) {
+  const k = todayKey();
+  waterData[k] = (waterData[k]||0) + ml;
+  localStorage.setItem('fitos_water', JSON.stringify(waterData));
+  updateWaterUI();
+  setTimeout(renderWaterChart, 50);
+}
+
+function resetWater() {
+  waterData[todayKey()] = 0;
+  localStorage.setItem('fitos_water', JSON.stringify(waterData));
+  updateWaterUI();
+  setTimeout(renderWaterChart, 50);
+}
+
+function easeOutBack(t) {
+  const c1=1.2,c3=c1+1;
+  return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);
+}
+
+function animateWaterFill(targetY) {
+  if(animFrameId) cancelAnimationFrame(animFrameId);
+  const startY = currentFillY;
+  const startTime = performance.now();
+  const duration = 900;
+  function step(now) {
+    const t = Math.min((now-startTime)/duration,1);
+    const y = startY+(targetY-startY)*easeOutBack(t);
+    currentFillY = y;
+    const rect = document.getElementById('water-fill-rect');
+    const wave = document.getElementById('water-wave');
+    if(rect) rect.setAttribute('y',y);
+    if(wave) wave.setAttribute('transform',`translate(0,${y-10})`);
+    if(t<1) animFrameId = requestAnimationFrame(step);
+    else currentFillY = targetY;
+  }
+  animFrameId = requestAnimationFrame(step);
+}
+
+function updateWaterUI() {
+  const amount = getTodayWater();
+  const pct = Math.min(100,Math.round(amount/WATER_TARGET*100));
+  const el_pct = document.getElementById('water-pct');
+  const dropMl = document.getElementById('drop-ml-text');
+  if(el_pct) el_pct.textContent = pct+'% del target giornaliero';
+  if(dropMl) dropMl.textContent = amount;
+  animateWaterFill(168-(160*pct/100));
+}
+
+function renderWaterChart() {
+  const chart = document.getElementById('water-chart');
+  if(!chart) return;
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = d.toISOString().split('T')[0];
+    const lbl = d.toLocaleDateString('it-IT',{weekday:'short'}).slice(0,3);
+    days.push({key,lbl,val:waterData[key]||0});
+  }
+  const maxVal = Math.max(WATER_TARGET,...days.map(d=>d.val),1);
+  const trackH = 80;
+  chart.innerHTML = days.map((d,idx)=>{
+    const isToday = d.key===todayKey();
+    const fillH = Math.round((d.val/maxVal)*trackH);
+    const delay = (idx*60)+'ms';
+    return `<div class="wc-col">
+      <div class="wc-val" style="color:${isToday?'#60a5fa':'var(--text3)'};">${d.val>0?d.val:''}</div>
+      <div class="wc-track" style="height:${trackH}px;">
+        <div style="position:absolute;left:0;right:0;bottom:${Math.round((WATER_TARGET/maxVal)*trackH)}px;border-top:1px dashed rgba(96,165,250,0.25);"></div>
+        <div class="wc-fill" style="height:0;opacity:${isToday?1:0.55};transition:height 1s cubic-bezier(0.34,1.1,0.64,1) ${delay};" data-h="${fillH}"></div>
+      </div>
+      <div class="wc-lbl" style="color:${isToday?'#60a5fa':'var(--text3)'};">${d.lbl}</div>
+    </div>`;
+  }).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll('.wc-fill').forEach(el=>el.style.height=el.dataset.h+'px');
+  }));
+}
+
+function toggleReminder() {
+  reminderOn = !reminderOn;
+  const btn = document.getElementById('reminder-toggle');
+  const sub = document.getElementById('reminder-sub');
+  btn.classList.toggle('on',reminderOn);
+  if(reminderOn){
+    sub.textContent='Reminder attivo · ogni 45 minuti';
+    if(Notification.permission==='default') Notification.requestPermission();
+    reminderInterval = setInterval(()=>{
+      const msg='💧 Hai bevuto '+getTodayWater()+'ml oggi. Bevi qualcosa!';
+      if(Notification.permission==='granted') new Notification('FitOS',{body:msg});
+      else alert(msg);
+    },45*60*1000);
+  } else {
+    sub.textContent='Attiva per notifiche ogni 45 min';
+    clearInterval(reminderInterval);
+  }
+}
+
+// ═══════════════════════════════════
+// CUSTOMIZATION
+// ═══════════════════════════════════
+function selectCustomDay(day, el) {
+  currentCustomDay = day;
+  document.querySelectorAll('#custom-pills .day-pill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderCustomList();
+}
+
+function renderCustomList() {
+  const list = document.getElementById('custom-ex-list');
+  const exs = customPlan[currentCustomDay]||[];
+  if(!exs.length){ list.innerHTML='<div class="empty-state">Nessun esercizio.</div>'; return; }
+  list.innerHTML = exs.map((ex,i)=>`
+    <div class="custom-ex-row">
+      <input class="custom-input" value="${ex}" onchange="customPlan['${currentCustomDay}'][${i}]=this.value"/>
+      <button class="ex-log-del" onclick="removeCustomEx(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function removeCustomEx(i){ customPlan[currentCustomDay].splice(i,1); renderCustomList(); }
+
+function addCustomEx(){
+  const inp = document.getElementById('custom-new-ex');
+  const name = inp.value.trim(); if(!name) return;
+  customPlan[currentCustomDay].push(name); inp.value=''; renderCustomList();
+}
+
+function saveCustomPlan(){
+  localStorage.setItem('fitos_plan',JSON.stringify(customPlan));
+  const t=document.getElementById('custom-toast');
+  t.style.display='block'; setTimeout(()=>t.style.display='none',2500);
+  renderLogList();
+}
+
+// ═══════════════════════════════════
+// ACTIVE DAYS
+// ═══════════════════════════════════
+const DAYS_IT=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+let activeDays = JSON.parse(localStorage.getItem('fitos_days')||'[0,2,4]');
+
+function renderActiveDays(){
+  const strip = document.getElementById('active-days-strip');
+  if(!strip) return;
+  strip.innerHTML = DAYS_IT.map((d,i)=>`
+    <div class="wsd ${activeDays.includes(i)?'on':''}" onclick="toggleDay(${i})" id="aday-${i}">
+      <div class="wsd-name">${d}</div>
+      <div class="wsd-dot"></div>
+      <div class="wsd-bar"></div>
+    </div>
+  `).join('');
+}
+
+function toggleDay(i){
+  const idx=activeDays.indexOf(i);
+  if(idx>-1) activeDays.splice(idx,1); else activeDays.push(i);
+  renderActiveDays();
+}
+
+function saveActiveDays(){
+  localStorage.setItem('fitos_days',JSON.stringify(activeDays));
+  const t=document.getElementById('days-toast');
+  t.style.display='block'; setTimeout(()=>t.style.display='none',2500);
+}
+
+// ═══════════════════════════════════
+// SERVICE WORKER
+// ═══════════════════════════════════
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+renderLogList();
+renderHistory();
+renderCustomList();
+renderActiveDays();
+updateWaterUI();
+renderWaterChart();
+</script>
+</body>
+</html>
