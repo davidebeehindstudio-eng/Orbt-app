@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FitOS">
+<meta name="apple-mobile-web-app-title" content="ORBT">
 <meta name="theme-color" content="#080808">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.svg">
-<title>FitOS</title>
+<title>ORBT</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Cormorant+Garamond:ital,wght@1,400;1,600&family=Urbanist:ital,wght@1,800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -29,7 +29,19 @@ body{
   background:var(--bg);color:var(--text);font-family:var(--sans);
   height:100%;overflow:hidden;font-size:14px;
   -webkit-font-smoothing:antialiased;
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior:none;
 }
+
+/* Minimum touch target size 44px for all interactive elements */
+button, .nav-tab, .water-btn, .wo-start-btn, .wo-day-chip,
+.day-pill, .ai-day-pill, .stab, .goal-btn, .wsd, .asd {
+  min-height: 44px;
+}
+.water-btn { min-height: 48px; }
+
+/* Prevent iOS double-tap zoom */
+button, a { touch-action: manipulation; }
 
 /* NOISE */
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.5;}
@@ -47,6 +59,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   border-bottom:1px solid var(--border);
   flex-shrink:0;z-index:50;
 }
+.logo{text-decoration:none;}
 .logo svg{display:block;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
 .phase-badge{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 9px;border-radius:3px;background:var(--red-dim);color:var(--red2);border:1px solid rgba(232,57,74,0.2);}
@@ -80,7 +93,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .nav-tab.active .nav-tab-dot{opacity:1;}
 
 /* ── PAGES ── */
-.page{display:none;padding:20px 16px 8px;}
+.page{display:none;padding:16px 16px 8px;}
 .page.active{display:block;animation:pageIn 0.38s cubic-bezier(0.22,1,0.36,1) both;}
 @keyframes pageIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 
@@ -189,9 +202,90 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .prog-fill{height:100%;width:8%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--red2));}
 .prog-val{font-size:9px;font-weight:700;color:var(--text2);flex-shrink:0;}
 
-/* ══════════════════
-   TRACKER STYLES
-══════════════════ */
+/* ══════════════════════════════
+   AI ALIMENTAZIONE PAGE
+══════════════════════════════ */
+.goal-toggle-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:4px;margin-bottom:16px;gap:4px;}
+.goal-btn{flex:1;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:4px;padding:14px 8px;border-radius:12px;border:none;background:transparent;cursor:pointer;transition:all 0.2s;font-family:var(--sans);}
+.goal-btn.active{background:var(--red-dim);border:1px solid rgba(232,57,74,0.25);}
+.goal-label{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:0.08em;text-transform:uppercase;}
+.goal-btn.active .goal-label{color:var(--red2);}
+.goal-divider{width:1px;height:40px;background:var(--border);}
+
+/* Section dividers */
+.section-divider{font-size:9px;font-weight:800;color:var(--text);letter-spacing:0.14em;text-transform:uppercase;padding:20px 0 10px;margin-top:4px;display:flex;align-items:center;gap:8px;}
+.section-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-sub{font-size:11px;color:var(--text3);margin:-4px 0 12px;font-weight:400;line-height:1.5;}
+
+/* Calendar band — mobile font sizes */
+.cal-band-type{font-size:8px;font-weight:800;color:var(--red2);text-align:center;margin-bottom:4px;letter-spacing:0.03em;}
+.cal-band-ex{font-size:10px;color:var(--text2);font-weight:500;line-height:1.5;display:flex;align-items:flex-start;gap:3px;}
+.cal-band-ex::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:5px;opacity:0.6;}
+
+.ai-params-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+.ai-params-title{font-size:9px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px;}
+.ai-params-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ai-param{display:flex;flex-direction:column;gap:5px;}
+.ai-param-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
+.ai-param-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-family:var(--sans);font-size:16px;font-weight:700;color:var(--text);outline:none;-webkit-appearance:none;-moz-appearance:textfield;}
+.ai-param-input::-webkit-inner-spin-button,.ai-param-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.ai-param-input:focus{border-color:var(--red);}
+
+.ai-generate-btn{width:100%;padding:16px 20px;background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.22);border-radius:14px;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;cursor:pointer;margin-bottom:20px;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;}
+.ai-generate-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,57,74,0.08) 0%,rgba(232,57,74,0) 60%);pointer-events:none;}
+.ai-generate-btn:active{border-color:rgba(255,255,255,0.45);color:white;transform:scale(0.98);}
+.ai-generate-btn.loading{opacity:0.6;pointer-events:none;}
+
+/* AI loading pulse */
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.ai-loading-dot{width:6px;height:6px;border-radius:50%;background:white;animation:pulse 1.2s ease infinite;}
+.ai-loading-dot:nth-child(2){animation-delay:0.2s;}
+.ai-loading-dot:nth-child(3){animation-delay:0.4s;}
+.ai-loading-dots{display:flex;gap:5px;align-items:center;}
+
+/* Macro strip */
+.ai-macro-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.ai-macro-chip{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;}
+.ai-macro-chip-val{font-size:18px;font-weight:800;letter-spacing:-0.03em;line-height:1;margin-bottom:3px;}
+.ai-macro-chip-lbl{font-size:8px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
+.chip-kcal .ai-macro-chip-val{color:var(--text);}
+.chip-pro .ai-macro-chip-val{color:var(--pro);}
+.chip-carb .ai-macro-chip-val{color:var(--carb);}
+.chip-fat .ai-macro-chip-val{color:var(--fat);}
+
+/* Day pill active for AI -->  */
+.ai-day-pill{flex-shrink:0;font-size:10px;font-weight:700;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.ai-day-pill.active{background:var(--red-dim);color:var(--red2);border-color:rgba(232,57,74,0.3);}
+
+/* AI meal card */
+.ai-meal-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.ai-meal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
+.ai-meal-time{font-size:8px;font-weight:800;color:var(--red2);letter-spacing:0.1em;text-transform:uppercase;}
+.ai-meal-kcal{font-size:10px;font-weight:700;color:var(--text2);}
+.ai-meal-body{padding:12px 14px;}
+.ai-meal-name{font-family:var(--display);font-size:17px;font-style:italic;font-weight:400;color:var(--text);margin-bottom:6px;}
+.ai-meal-desc{font-size:11.5px;color:var(--text2);line-height:1.65;margin-bottom:8px;}
+.ai-meal-macros{display:flex;gap:10px;flex-wrap:wrap;}
+.ai-meal-macro{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.amp-pro{background:rgba(139,92,246,0.1);color:var(--pro);}
+.amp-carb{background:rgba(59,130,246,0.1);color:var(--carb);}
+.amp-fat{background:rgba(232,137,74,0.1);color:var(--fat);}
+
+/* Lista spesa */
+.ai-spesa-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.ai-spesa-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;}
+.ai-spesa-title{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;}
+#spesa-arrow{font-size:14px;color:var(--text3);transition:transform 0.2s;}
+.ai-spesa-category{padding:4px 16px 12px;}
+.ai-spesa-cat-title{font-size:8px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;margin-top:10px;}
+.ai-spesa-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);}
+.ai-spesa-item:last-child{border-bottom:none;}
+.ai-spesa-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;}
+.ai-spesa-check.checked{background:var(--red);border-color:var(--red);}
+.ai-spesa-check.checked::after{content:'✓';font-size:10px;color:white;font-weight:700;}
+
+.ai-regen-btn{width:100%;padding:13px;background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:12px;font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;margin-bottom:20px;transition:all 0.2s;}
+.ai-regen-btn:active{border-color:rgba(255,255,255,0.3);color:var(--text);}
 /* Day selector pills */
 .day-pills{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .day-pills::-webkit-scrollbar{display:none;}
@@ -204,13 +298,23 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .ex-log-row:last-child{border-bottom:none;}
 .ex-log-lbl{font-size:7px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;text-align:center;}
 .ex-log-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;}
-.ex-log-input{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 4px;font-family:var(--sans);font-size:11px;font-weight:700;color:var(--text);text-align:center;width:100%;outline:none;-webkit-appearance:none;}
+.ex-log-input{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 4px;font-family:var(--sans);font-size:16px;font-weight:700;color:var(--text);text-align:center;width:100%;outline:none;-webkit-appearance:none;-moz-appearance:textfield;}
+.ex-log-input::-webkit-inner-spin-button,.ex-log-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 .ex-log-input:focus{border-color:var(--red);}
+
+/* Premium stepper */
+.stepper{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;}
+.stepper-val{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:5px 3px;font-family:var(--sans);font-size:16px;font-weight:700;color:var(--text);text-align:center;width:100%;outline:none;-webkit-appearance:none;-moz-appearance:textfield;}
+.stepper-val:focus{border-color:var(--red);}
+.stepper-val::-webkit-inner-spin-button,.stepper-val::-webkit-outer-spin-button{-webkit-appearance:none;}
+.stepper-btns{display:flex;gap:2px;width:100%;}
+.stepper-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;padding:3px 0;line-height:1;transition:all 0.15s;font-family:var(--sans);}
+.stepper-btn:active{background:var(--red-dim);border-color:rgba(232,57,74,0.3);color:var(--red2);}
 .ex-log-del{background:none;border:none;color:var(--text3);font-size:16px;padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
 /* Add ex row */
 .add-row{display:flex;gap:8px;margin-top:12px;}
-.add-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;}
+.add-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:16px;color:var(--text);outline:none;-webkit-appearance:none;}
 .add-input:focus{border-color:var(--red);}
 .add-btn{background:var(--red);color:white;border:none;border-radius:10px;padding:10px 14px;font-family:var(--sans);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
 
@@ -235,14 +339,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .water-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .water-btn{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 8px;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;text-align:center;transition:all 0.15s;-webkit-appearance:none;}
 .water-btn:active{background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.35);color:#60a5fa;}
-.water-reset{background:none;border:none;font-family:var(--sans);font-size:9px;font-weight:600;color:var(--text3);cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;display:block;width:100%;text-align:center;padding:8px 0;margin-bottom:4px;}
+.water-reset{background:none;border:none;font-family:var(--sans);font-size:9px;font-weight:600;color:var(--text3);cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;display:block;width:100%;text-align:center;padding:8px 0;margin-bottom:4px;transition:color 0.15s;}
+.water-reset:active{color:var(--red);}
 
 /* Water chart */
 .water-chart{display:flex;align-items:flex-end;gap:6px;height:110px;margin-bottom:6px;}
 .wc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
 .wc-val{font-size:7px;font-weight:700;color:#60a5fa;min-height:11px;text-align:center;}
 .wc-track{width:100%;background:var(--surface);border-radius:4px 4px 2px 2px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;position:relative;}
-.wc-fill{width:100%;background:linear-gradient(180deg,#60a5fa,#1d4ed8);border-radius:4px 4px 0 0;height:0;transition:height 1s cubic-bezier(0.34,1.1,0.64,1);}
+.wc-fill{width:100%;background:linear-gradient(180deg,#60a5fa,#1d4ed8);border-radius:4px 4px 0 0;height:0;transition:height 1s cubic-bezier(0.4,0,0.2,1);}
 .wc-lbl{font-size:7px;font-weight:700;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;}
 
 /* Reminder */
@@ -257,7 +362,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* Custom plan */
 .custom-ex-row{display:grid;grid-template-columns:1fr 32px;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
 .custom-ex-row:last-child{border-bottom:none;}
-.custom-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:12px;color:var(--text);outline:none;width:100%;-webkit-appearance:none;}
+.custom-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:16px;color:var(--text);outline:none;width:100%;-webkit-appearance:none;}
 .custom-input:focus{border-color:var(--red);}
 
 /* Week strip */
@@ -272,11 +377,218 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .wsd-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:transparent;transition:background 0.2s;}
 .wsd.on .wsd-bar{background:var(--red);}
 
-/* Divider */
-.section-divider{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.14em;text-transform:uppercase;padding:16px 0 8px;}
+/* Calendar — vertical bands */
+.cal-week{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-bottom:4px;perspective:800px;perspective-origin:50% 0%;}
+.cal-week::-webkit-scrollbar{display:none;}
+.cal-band{flex:1;min-width:42px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);background:#1e1e20;transition:border-color 0.2s;cursor:pointer;touch-action:none;user-select:none;}
+.cal-band.has-workout{border-color:rgba(255,255,255,0.13);background:#26262a;}
+.cal-band.drag-over{border-color:var(--red);background:rgba(232,57,74,0.15);}
+.cal-band-header{padding:10px 6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+.cal-band.has-workout .cal-band-header{border-bottom-color:rgba(232,57,74,0.2);}
+.cal-band-name{font-size:8px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);}
+.cal-band.has-workout .cal-band-name{color:var(--red2);}
+.cal-band-body{flex:1;padding:8px 6px;display:flex;flex-direction:column;gap:4px;}
+.cal-band-empty{font-size:9px;color:var(--text3);text-align:center;padding:8px 0;font-style:italic;}
+.cal-band-del{background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;padding:4px;display:block;margin:4px auto 0;width:100%;text-align:center;transition:color 0.15s;}
+.cal-band-del:active{color:var(--red);}
+.cal-band-drag-handle{font-size:10px;color:var(--text3);text-align:center;padding:6px 0;border-top:1px solid var(--border);margin-top:auto;opacity:0.5;}
+.cal-band.has-workout .cal-band-drag-handle{border-top-color:rgba(232,57,74,0.15);}
+
+/* 3D drag effect */
+.cal-band{transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.2s;}
+.cal-band.dragging{
+  opacity:0.35;
+  transform:scale(0.96);
+  filter:blur(1px);
+}
+.cal-band.drag-over{
+  border-color:rgba(255,255,255,0.35)!important;
+  background:#2e2e32!important;
+  transform:scale(1.04) translateY(-3px);
+  box-shadow:0 12px 32px rgba(255,255,255,0.06),0 0 0 1px rgba(255,255,255,0.2);
+}
+
+/* Floating clone 3D card */
+#drag-clone-3d{
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+  transform-origin:center top;
+  border-radius:14px;
+  background:#26262a;
+  border:1.5px solid rgba(255,255,255,0.25);
+  box-shadow:0 24px 48px rgba(0,0,0,0.7), 0 8px 16px rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.1);
+  min-width:52px;
+  overflow:hidden;
+  transition:none;
+}
+
+/* Assign strip */
+.assign-strip{display:flex;border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:16px;}
+.asd{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 3px;cursor:pointer;transition:all 0.18s;position:relative;border-right:1px solid var(--border);}
+.asd:last-child{border-right:none;}
+.asd.selected{background:var(--red-dim);}
+.asd-name{font-size:7px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+.asd.selected .asd-name{color:var(--red2);}
+.asd-dot{width:5px;height:5px;border-radius:50%;border:1.5px solid var(--text3);transition:all 0.18s;}
+.asd.selected .asd-dot{background:var(--red);border-color:var(--red);}
+.asd-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:transparent;}
+.asd.selected .asd-bar{background:var(--red);}
 
 /* Empty state */
 .empty-state{text-align:center;padding:28px 0;font-size:12px;color:var(--text3);}
+
+/* ══════════════════════════════
+   WORKOUT HOME PAGE
+══════════════════════════════ */
+#page-allenamento{padding:0!important;position:relative;overflow:hidden;}
+
+/* Animated canvas background */
+#workout-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:0;pointer-events:none;opacity:0.7;
+}
+
+/* Quote motivazionale */
+.wo-quote-wrap{margin-bottom:12px;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;position:relative;z-index:1;}
+.wo-quote-mark{font-family:var(--display);font-size:32px;font-weight:400;color:var(--red);line-height:0.6;margin-bottom:6px;opacity:0.7;}
+.wo-quote-text{font-family:var(--sans);font-size:11px;font-style:normal;font-weight:700;color:var(--text);line-height:1.5;margin-bottom:5px;}
+.wo-quote-author{font-size:8px;font-weight:700;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;}
+.wo-hero{position:relative;z-index:1;padding:12px 16px 0;}
+.wo-hero-tag{font-size:9px;font-weight:700;color:var(--red2);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:5px;}
+.wo-hero-type{font-family:var(--display);font-size:38px;font-weight:400;font-style:italic;color:var(--text);line-height:1;margin-bottom:3px;}
+.wo-hero-sub{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:0.05em;margin-bottom:10px;}
+
+/* Hero image */
+.wo-hero-img-wrap{
+  position:relative;width:100%;height:185px;
+  border-radius:14px;overflow:hidden;margin-bottom:11px;
+  background:var(--surface);
+}
+.wo-hero-visual{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.wo-hero-visual svg{opacity:0.55;}
+.wo-hero-img-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom, rgba(8,8,8,0) 30%, rgba(8,8,8,0.85) 100%);
+}
+
+/* Start button */
+.wo-start-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:13px;
+  background:var(--red);color:white;
+  border:none;border-radius:12px;
+  font-family:var(--sans);font-size:11px;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
+  cursor:pointer;margin-bottom:12px;
+  box-shadow:0 8px 24px rgba(232,57,74,0.35);
+  transition:all 0.2s;
+}
+.wo-start-btn:active{transform:scale(0.97);box-shadow:0 4px 12px rgba(232,57,74,0.25);}
+
+/* Week strip */
+.wo-week-strip{
+  position:relative;z-index:1;
+  display:flex;gap:6px;
+  overflow-x:auto;padding:0 16px 12px;
+  -webkit-overflow-scrolling:touch;
+}
+.wo-week-strip::-webkit-scrollbar{display:none;}
+.wo-day-chip{
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:10px 12px;border-radius:12px;
+  border:1px solid var(--border);background:rgba(255,255,255,0.04);
+  cursor:pointer;transition:all 0.18s;min-width:52px;
+  backdrop-filter:blur(8px);
+}
+.wo-day-chip.today{border-color:rgba(232,57,74,0.35);background:var(--red-dim);}
+.wo-day-chip.rest{opacity:0.45;}
+.wo-day-name{font-size:7px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+.wo-day-chip.today .wo-day-name{color:var(--red2);}
+.wo-day-type{font-size:9px;font-weight:700;color:var(--text2);}
+.wo-day-chip.today .wo-day-type{color:var(--text);}
+.wo-day-dot{width:4px;height:4px;border-radius:50%;background:var(--text3);}
+.wo-day-chip.today .wo-day-dot{background:var(--red);}
+
+/* Active workout */
+.wo-active-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 12px;position:relative;z-index:1;
+}
+.wo-active-title{font-family:var(--display);font-size:30px;font-style:italic;color:var(--text);}
+.wo-active-sub{font-size:10px;color:var(--text2);font-weight:500;margin-top:2px;}
+.wo-end-btn{
+  background:transparent;border:1px solid var(--border2);color:var(--text2);
+  border-radius:8px;padding:8px 16px;font-family:var(--sans);
+  font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;
+}
+.wo-end-btn:active{color:var(--red);border-color:var(--red);}
+
+/* Timer */
+.wo-timer-card{
+  margin:0 20px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:16px;padding:16px;
+  backdrop-filter:blur(10px);
+  position:relative;z-index:1;
+}
+.wo-timer-label{font-size:8px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;}
+.wo-timer-display{font-family:var(--sans);font-size:42px;font-weight:800;color:var(--text);letter-spacing:-0.03em;line-height:1;margin-bottom:12px;}
+.wo-timer-btns{display:flex;gap:6px;margin-bottom:10px;}
+.wo-timer-preset{
+  flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text2);font-family:var(--sans);
+  font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s;
+}
+.wo-timer-preset:active{background:var(--red-dim);border-color:rgba(232,57,74,0.3);color:var(--red2);}
+.wo-timer-stop{
+  padding:8px 12px;border-radius:8px;border:none;
+  background:rgba(232,57,74,0.15);color:var(--red2);font-family:var(--sans);
+  font-size:10px;font-weight:700;cursor:pointer;
+}
+.wo-timer-bar-wrap{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.wo-timer-bar{height:100%;background:var(--red);border-radius:2px;width:100%;transition:width 1s linear;}
+
+/* Exercise checklist */
+.wo-ex-card{
+  margin:0 20px 10px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;backdrop-filter:blur(10px);
+  position:relative;z-index:1;
+}
+.wo-ex-card-header{padding:12px 16px;border-bottom:1px solid var(--border);}
+.wo-ex-card-name{font-size:13px;font-weight:700;color:var(--text);}
+.wo-ex-card-info{font-size:10px;color:var(--text3);margin-top:2px;font-weight:500;}
+.wo-series-list{padding:10px 16px;}
+.wo-serie-row{
+  display:flex;align-items:center;gap:12px;
+  padding:8px 0;border-bottom:1px solid var(--border);
+}
+.wo-serie-row:last-child{border-bottom:none;}
+.wo-serie-num{font-size:9px;font-weight:700;color:var(--text3);width:20px;}
+.wo-serie-label{flex:1;font-size:11px;color:var(--text2);font-weight:500;}
+.wo-serie-check{
+  width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.18s;flex-shrink:0;background:transparent;
+}
+.wo-serie-check.done{background:var(--red);border-color:var(--red);}
+.wo-serie-check.done::after{content:'✓';font-size:12px;font-weight:700;color:white;}
+
+/* Stats block */
+.wo-stats-block{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 14px;position:relative;z-index:1;}
+.wo-phase-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:16px;padding:16px;}
+.wo-ring-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:center;}
+.wo-phase-label{font-size:8px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;}
+.wo-phase-name{font-size:12px;font-weight:800;color:var(--text);margin-bottom:2px;line-height:1.3;}
+.wo-phase-weeks{font-size:9px;color:var(--text3);font-weight:600;margin-bottom:10px;}
+.wo-phase-bar-wrap{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:6px;}
+.wo-phase-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--red2));transition:width 0.8s cubic-bezier(0.34,1.1,0.64,1);}
+.wo-phase-progress-text{font-size:9px;font-weight:700;color:var(--text3);}
+.wo-ring-wrap{margin:8px 0 6px;}
+.wo-ring-label{font-size:9px;font-weight:600;color:var(--text3);text-align:center;}
 
 /* ── ANIMATIONS ── */
 @keyframes shellIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
@@ -290,14 +602,31 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 <!-- TOPBAR -->
 <header class="topbar">
-  <a class="logo" href="#">
-    <svg width="90" height="26" viewBox="0 0 124 34" fill="none">
-      <text x="0" y="26" font-family="Montserrat,sans-serif" font-weight="900" font-size="28" fill="white" letter-spacing="-1">FIT</text>
-      <circle cx="69" cy="16" r="10" fill="none" stroke="#e8394a" stroke-width="3"/>
-      <path d="M69 6 A10 10 0 1 1 65.6 25.4" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="65.6" cy="25.4" r="2.5" fill="#e8394a"/>
-      <text x="83" y="26" font-family="Montserrat,sans-serif" font-weight="900" font-size="28" fill="white" letter-spacing="-1">S</text>
-    </svg>
+  <a class="logo" href="#" style="text-decoration:none;">
+    <div style="display:flex;align-items:center;letter-spacing:3px;">
+      <style>
+        .orbt-o{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:#e8394a;display:inline-block;animation:orbtO 4s cubic-bezier(0.4,0,0.2,1) infinite;}
+        .orbt-r{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:white;display:inline-block;opacity:0;animation:orbtAppear 4s 0s cubic-bezier(0.4,0,0.2,1) infinite;}
+        .orbt-b{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:white;display:inline-block;opacity:0;animation:orbtAppear 4s 0.18s cubic-bezier(0.4,0,0.2,1) infinite;}
+        .orbt-t{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:white;display:inline-block;opacity:0;animation:orbtAppear 4s 0.36s cubic-bezier(0.4,0,0.2,1) infinite;}
+        @keyframes orbtO{
+          0%{transform:scale(1.3);color:#e8394a;text-shadow:0 0 12px rgba(232,57,74,0.8);}
+          18%{transform:scale(1);color:#e8394a;text-shadow:none;}
+          80%,100%{transform:scale(1);color:#e8394a;}
+        }
+        @keyframes orbtAppear{
+          0%{opacity:0;transform:translateX(-6px);}
+          12%{opacity:0;transform:translateX(-6px);}
+          30%{opacity:1;transform:translateX(0);}
+          80%{opacity:1;transform:translateX(0);}
+          95%,100%{opacity:0;transform:translateX(0);}
+        }
+      </style>
+      <span class="orbt-o">O</span>
+      <span class="orbt-r">R</span>
+      <span class="orbt-b">B</span>
+      <span class="orbt-t">T</span>
+    </div>
   </a>
   <div class="topbar-right">
     <span class="phase-badge">Fase 1</span>
@@ -305,196 +634,216 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
 </header>
 
-<!-- SCROLL AREA -->
+<!-- PHASE UPGRADE MODAL -->
+<div id="phase-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);overflow-y:auto;padding:24px 16px;">
+  <div style="max-width:400px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:9px;font-weight:700;color:var(--red2);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px;">Nuova fase disponibile</div>
+      <div id="modal-phase-title" style="font-family:var(--display);font-size:38px;font-style:italic;color:var(--text);margin-bottom:4px;"></div>
+      <div id="modal-phase-sub" style="font-size:11px;color:var(--text2);"></div>
+    </div>
+    <div id="modal-phase-content"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;padding-bottom:40px;">
+      <button onclick="dismissPhaseModal()" style="flex:1;padding:14px;background:transparent;border:1px solid var(--border2);border-radius:12px;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);cursor:pointer;">Dopo</button>
+      <button onclick="activatePhase()" style="flex:2;padding:14px;background:var(--red);border:none;border-radius:12px;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:white;cursor:pointer;" id="modal-activate-btn">Attiva</button>
+    </div>
+  </div>
+</div>
 <div class="scroll-area" id="scroll-area">
 
   <!-- ══════════ PAGE: OVERVIEW ══════════ -->
-  <div class="page active" id="page-overview">
-    <div class="page-tag">Dashboard · Sistema attivo</div>
-    <h1 class="page-title">Il tuo piano per<br><span>aumentare la massa</span></h1>
-    <p class="page-sub">Push/Pull/Legs · 3–4 giorni/sett · Ore 6:40</p>
-
-    <div class="metrics-grid">
-      <div class="metric-card"><div class="mc-label">Peso</div><div class="mc-value">64 <span class="mc-unit">kg</span></div><div class="mc-sub">+0.5–1 kg/mese</div></div>
-      <div class="metric-card"><div class="mc-label">Calorie</div><div class="mc-value">2750 <span class="mc-unit">kcal</span></div><div class="mc-sub">+250 surplus</div></div>
-      <div class="metric-card"><div class="mc-label">Proteine</div><div class="mc-value">145 <span class="mc-unit">g</span></div><div class="mc-sub">2.3g/kg corporeo</div></div>
-      <div class="metric-card"><div class="mc-label">Durata</div><div class="mc-value">12 <span class="mc-unit">sett</span></div><div class="mc-sub">4 fasi progressive</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><span class="card-title">Settimana tipo</span><span class="badge badge-rest">3–4 giorni</span></div>
-      <div class="card-body">
-        <div class="week-grid">
-          <div class="day-cell training"><div class="day-name">Lun</div><div class="day-type">Push</div></div>
-          <div class="day-cell"><div class="day-name">Mar</div><div class="day-type">–</div></div>
-          <div class="day-cell training"><div class="day-name">Mer</div><div class="day-type">Pull</div></div>
-          <div class="day-cell"><div class="day-name">Gio</div><div class="day-type">–</div></div>
-          <div class="day-cell training"><div class="day-name">Ven</div><div class="day-type">Legs</div></div>
-          <div class="day-cell"><div class="day-name">Sab</div><div class="day-type">–</div></div>
-          <div class="day-cell" style="border-color:rgba(232,57,74,0.15);background:rgba(232,57,74,0.03)"><div class="day-name">Dom</div><div class="day-type" style="color:var(--red);font-size:8px;">+Up</div></div>
-        </div>
-        <div class="tip" style="margin-bottom:0"><div class="tip-tag">Orario 6:40</div><div class="tip-text">Mangia 20–30 min prima (ore 6:10). Banana + gallette + miele + caffè. Riscaldamento 8–10 min sempre incluso.</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><span class="card-title">Parametri</span></div>
-      <div class="card-body">
-        <div style="display:flex;flex-direction:column;gap:0;">
-          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">Età</span><span style="font-size:14px;font-weight:800;">21 anni</span></div>
-          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">Altezza</span><span style="font-size:14px;font-weight:800;">1.76 m</span></div>
-          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">Peso</span><span style="font-size:14px;font-weight:800;">64 kg</span></div>
-          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">BMI</span><span style="font-size:14px;font-weight:800;color:var(--green);">20.7 ✓</span></div>
-          <div style="display:flex;justify-content:space-between;padding:9px 0;"><span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">TDEE</span><span style="font-size:14px;font-weight:800;">~2500 kcal</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tip"><div class="tip-tag">Progressione lineare</div><div class="tip-text">Ogni sessione: +1 ripetizione o +1.25 kg. Annota sempre i carichi. Senza progressione, niente crescita.</div></div>
-    <div class="tip"><div class="tip-tag">Recupero = crescita</div><div class="tip-text">7–8h di sonno. Coricarsi entro le 23:00. Il muscolo cresce a riposo, non in palestra.</div></div>
-
-    <div class="prog-row">
-      <span class="prog-label">Settimana</span>
-      <div class="prog-track"><div class="prog-fill"></div></div>
-      <span class="prog-val">1 / 12</span>
-    </div>
-  </div>
+  <!-- ══════════ PAGE: OVERVIEW (rimossa) ══════════ -->
+  <div class="page" id="page-overview" style="display:none;"></div>
 
   <!-- ══════════ PAGE: ALLENAMENTO ══════════ -->
-  <div class="page" id="page-allenamento">
-    <div class="page-tag">Piano · Allenamento</div>
-    <h1 class="page-title">I tuoi<br><span>allenamenti</span></h1>
+  <div class="page active" id="page-allenamento">
 
-    <div class="section-tabs" id="workout-tabs">
-      <div class="stab active" onclick="switchSubPanel('workout','push',this)">Push</div>
-      <div class="stab" onclick="switchSubPanel('workout','pull',this)">Pull</div>
-      <div class="stab" onclick="switchSubPanel('workout','legs',this)">Legs</div>
-      <div class="stab" onclick="switchSubPanel('workout','upper',this)">Upper +</div>
-    </div>
+    <!-- CANVAS SFONDO ANIMATO -->
+    <canvas id="workout-canvas"></canvas>
 
-    <!-- PUSH -->
-    <div class="subpanel active" id="workout-push">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Petto · Spalle · Tricipiti</span><span class="badge badge-push">Push</span></div>
-        <div class="card-body">
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Panca piana multipower</span><span class="ex-item-pill">3×8–10</span></div><div class="ex-item-note">Smith machine · focus tecnica</div><div class="ex-item-rest">Recupero: 2 min</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Panca inclinata 30°</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Manubri · enfasi clavicolare</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Shoulder press manubri</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Seduto · controllo eccentrica</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Alzate laterali cavi</span><span class="ex-item-pill">3×12–15</span></div><div class="ex-item-note">Tensione costante sul deltoide</div><div class="ex-item-rest">Recupero: 60 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Push-down cavo (corda)</span><span class="ex-item-pill">3×12–15</span></div><div class="ex-item-note">Isolamento tricipite</div><div class="ex-item-rest">Recupero: 60 s</div></div>
-        </div>
+    <!-- HERO SECTION: piano del giorno -->
+    <div class="wo-hero" id="wo-hero">
+      <!-- Quote motivazionale -->
+      <div class="wo-quote-wrap">
+        <div class="wo-quote-mark">"</div>
+        <div class="wo-quote-text" id="wo-quote-text"></div>
+        <div class="wo-quote-author" id="wo-quote-author"></div>
       </div>
-      <div class="tip"><div class="tip-tag">Panca multipower</div><div class="tip-text">Barra alla linea capezzoli. Discesa lenta 2–3 sec. Prima della panca: 2 serie vuote + 1 serie al 50%.</div></div>
+      <div class="wo-hero-tag" id="wo-today-tag">Oggi · Lunedì</div>
+      <div class="wo-hero-type" id="wo-today-type">Push Day</div>
+      <div class="wo-hero-sub" id="wo-today-sub">Petto · Spalle · Tricipiti</div>
+      <div class="wo-hero-img-wrap" id="wo-hero-card">
+        <div class="wo-hero-visual" id="wo-hero-visual"></div>
+        <div class="wo-hero-img-overlay"></div>
+      </div>
+      <div class="wo-start-btn" id="wo-start-btn" onclick="startWorkout()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polygon points="4,2 14,8 4,14" fill="white"/></svg>
+        Inizia allenamento
+      </div>
     </div>
 
-    <!-- PULL -->
-    <div class="subpanel" id="workout-pull">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Schiena · Bicipiti · Post. spalla</span><span class="badge badge-pull">Pull</span></div>
-        <div class="card-body">
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Pulldown lat machine</span><span class="ex-item-pill">4×8–10</span></div><div class="ex-item-note">Presa larga o neutra</div><div class="ex-item-rest">Recupero: 2 min</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Rematore macchinario</span><span class="ex-item-pill">3×8–10</span></div><div class="ex-item-note">Schiena piatta · tirata al petto</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Face pull cavo</span><span class="ex-item-pill">3×15</span></div><div class="ex-item-note">Salute cuffia dei rotatori</div><div class="ex-item-rest">Recupero: 60 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Curl bilanciere EZ</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Gomiti fissi · ROM completo</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Curl martello manubri</span><span class="ex-item-pill">2×12</span></div><div class="ex-item-note">Brachiale + brachioradiale</div><div class="ex-item-rest">Recupero: 60 s</div></div>
+    <!-- WEEK STRIP -->
+    <div class="wo-week-strip" id="wo-week-strip"></div>
+
+    <!-- PHASE + RING BLOCK -->
+    <div class="wo-stats-block">
+
+      <!-- Progressione fase -->
+      <div class="wo-phase-card">
+        <div class="wo-phase-label">Fase attuale</div>
+        <div class="wo-phase-name" id="wo-phase-name">Fase 1 · Adattamento</div>
+        <div class="wo-phase-weeks" id="wo-phase-weeks">Settimane 1–4</div>
+        <div class="wo-phase-bar-wrap">
+          <div class="wo-phase-bar" id="wo-phase-bar"></div>
         </div>
+        <div class="wo-phase-progress-text" id="wo-phase-progress-text"></div>
       </div>
-      <div class="tip"><div class="tip-tag">Lat machine</div><div class="tip-text">Inizia il pull con le scapole. Immagina di schiacciare un arancio sotto le ascelle a fine movimento.</div></div>
+
+      <!-- Anello completamento settimanale -->
+      <div class="wo-ring-card">
+        <div class="wo-phase-label">Questa settimana</div>
+        <div class="wo-ring-wrap">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="var(--surface2)" stroke-width="7"/>
+            <circle id="wo-ring-arc" cx="40" cy="40" r="32" fill="none" stroke="var(--red)" stroke-width="7"
+              stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round"
+              transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 0.8s cubic-bezier(0.34,1.1,0.64,1);"/>
+            <text id="wo-ring-text" x="40" y="44" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="15" fill="white">0/0</text>
+          </svg>
+        </div>
+        <div class="wo-ring-label" id="wo-ring-label">giorni completati</div>
+      </div>
+
+    </div>
+    <div id="wo-active" style="display:none;">
+
+      <!-- HEADER ATTIVO -->
+      <div class="wo-active-header">
+        <div>
+          <div class="wo-active-title" id="wo-active-title">Push Day</div>
+          <div class="wo-active-sub" id="wo-active-sub">Petto · Spalle · Tricipiti</div>
+        </div>
+        <button class="wo-end-btn" onclick="endWorkout()">Fine</button>
+      </div>
+
+      <!-- TIMER RECUPERO -->
+      <div class="wo-timer-card" id="wo-timer-card">
+        <div class="wo-timer-label">Recupero</div>
+        <div class="wo-timer-display" id="wo-timer-display">00:00</div>
+        <div class="wo-timer-btns">
+          <button class="wo-timer-preset" onclick="startTimer(60)">1 min</button>
+          <button class="wo-timer-preset" onclick="startTimer(90)">90 sec</button>
+          <button class="wo-timer-preset" onclick="startTimer(120)">2 min</button>
+          <button class="wo-timer-stop" onclick="stopTimer()">Stop</button>
+        </div>
+        <div class="wo-timer-bar-wrap"><div class="wo-timer-bar" id="wo-timer-bar"></div></div>
+      </div>
+
+      <!-- LISTA ESERCIZI CON CHECKLIST -->
+      <div id="wo-ex-checklist"></div>
+
     </div>
 
-    <!-- LEGS -->
-    <div class="subpanel" id="workout-legs">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Quad · Femorali · Glutei · Polpacci</span><span class="badge badge-legs">Legs</span></div>
-        <div class="card-body">
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Squat multipower</span><span class="ex-item-pill">4×8–10</span></div><div class="ex-item-note">Smith machine · depth al parallelo</div><div class="ex-item-rest">Recupero: 2–3 min</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Leg press 45°</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Piedi alti = femorali + glutei</div><div class="ex-item-rest">Recupero: 2 min</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Leg curl seduto</span><span class="ex-item-pill">4×10–12</span></div><div class="ex-item-note">Eccentrica lenta 3 sec</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Leg extension</span><span class="ex-item-pill">3×12</span></div><div class="ex-item-note">Pausa 1 sec in contrazione</div><div class="ex-item-rest">Recupero: 60 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Calf raise in piedi</span><span class="ex-item-pill">4×15–20</span></div><div class="ex-item-note">Pausa 1 sec in basso e in alto</div><div class="ex-item-rest">Recupero: 45 s</div></div>
-        </div>
-      </div>
-      <div class="tip"><div class="tip-tag">Squat multipower</div><div class="tip-text">Piedi leggermente avanti. Ginocchia in linea con le dita. Prime 4 settimane: tecnica pura, niente peso extra.</div></div>
-    </div>
-
-    <!-- UPPER -->
-    <div class="subpanel" id="workout-upper">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Upper Body · Solo se recuperato</span><span class="badge badge-opt">4° giorno</span></div>
-        <div class="card-body">
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Panca inclinata manubri</span><span class="ex-item-pill">3×10</span></div><div class="ex-item-note">Variante push · petto alto</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Lat machine presa stretta</span><span class="ex-item-pill">3×10</span></div><div class="ex-item-note">Spessore schiena</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Arnold press</span><span class="ex-item-pill">3×12</span></div><div class="ex-item-note">Spalle complete con rotazione</div><div class="ex-item-rest">Recupero: 90 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">Cable curl cavo basso</span><span class="ex-item-pill">3×12</span></div><div class="ex-item-note">Tensione costante bicipite</div><div class="ex-item-rest">Recupero: 60 s</div></div>
-          <div class="ex-item"><div class="ex-item-top"><span class="ex-item-name">French press manubri</span><span class="ex-item-pill">3×10–12</span></div><div class="ex-item-note">Tricipite da supino</div><div class="ex-item-rest">Recupero: 75 s</div></div>
-        </div>
-      </div>
-      <div class="tip"><div class="tip-tag">Quando farlo</div><div class="tip-text">Solo se hai dormito bene e non sei indolenzito. In caso di dubbio, salta e recupera.</div></div>
-    </div>
   </div>
 
-  <!-- ══════════ PAGE: NUTRIZIONE ══════════ -->
+  <!-- ══════════ PAGE: NUTRIZIONE (AI-POWERED) ══════════ -->
   <div class="page" id="page-nutrizione">
-    <div class="page-tag">Nutrizione · Bulk pulito</div>
-    <h1 class="page-title">Piano<br><span>alimentare</span></h1>
 
-    <div class="section-tabs">
-      <div class="stab active" onclick="switchSubPanel('nutri','pasti',this)">Pasti</div>
-      <div class="stab" onclick="switchSubPanel('nutri','macro',this)">Macronutrienti</div>
-      <div class="stab" onclick="switchSubPanel('nutri','progressione',this)">Progressione</div>
-      <div class="stab" onclick="switchSubPanel('nutri','consigli',this)">Consigli</div>
+    <!-- HEADER -->
+    <div style="margin-bottom:20px;">
+      <div class="page-tag">AI · Nutrizionista sportivo</div>
+      <h1 class="page-title">Piano<br><span>alimentare</span></h1>
     </div>
 
-    <!-- PASTI -->
-    <div class="subpanel active" id="nutri-pasti">
-      <div class="meal-card"><div class="meal-top"><span class="meal-time">06:10 — Pre-Workout</span><span class="meal-kcal">~300 kcal</span></div><div class="meal-name">Pasto pre-allenamento</div><div class="meal-items">Banana · gallette di riso · miele · caffè nero</div></div>
-      <div class="meal-card"><div class="meal-top"><span class="meal-time">08:15 — Post-Workout</span><span class="meal-kcal">~680 kcal</span></div><div class="meal-name">Colazione ricca</div><div class="meal-items">4 uova intere · 80g avena · 150g yogurt greco 0% · frutta fresca</div></div>
-      <div class="meal-card"><div class="meal-top"><span class="meal-time">12:30 — Pranzo</span><span class="meal-kcal">~650 kcal</span></div><div class="meal-name">Pasto principale</div><div class="meal-items">150g pollo / merluzzo / tonno · 100g riso o pasta integrale · verdure · olio EVO</div></div>
-      <div class="meal-card"><div class="meal-top"><span class="meal-time">16:30 — Spuntino</span><span class="meal-kcal">~420 kcal</span></div><div class="meal-name">Snack proteico</div><div class="meal-items">200g ricotta · 30g frutta secca · 1 frutto</div></div>
-      <div class="meal-card"><div class="meal-top"><span class="meal-time">20:00 — Cena</span><span class="meal-kcal">~700 kcal</span></div><div class="meal-name">Secondo pasto</div><div class="meal-items">150g carne magra / salmone / uova · 200g patate o legumi · insalata · olio EVO</div></div>
-      <div class="tip"><div class="tip-tag">Giorni di riposo</div><div class="tip-text">Riduci i carboidrati di 60–80g. Mantieni proteine e grassi invariati.</div></div>
+    <!-- OBIETTIVO TOGGLE -->
+    <div class="goal-toggle-wrap">
+      <button class="goal-btn active" id="goal-massa" onclick="setGoal('massa',this)">
+        <div class="goal-label">Massa</div>
+      </button>
+      <div class="goal-divider"></div>
+      <button class="goal-btn" id="goal-definizione" onclick="setGoal('definizione',this)">
+        <div class="goal-label">Definizione</div>
+      </button>
     </div>
 
-    <!-- MACROS -->
-    <div class="subpanel" id="nutri-macro">
-      <div class="metrics-grid">
-        <div class="metric-card" style="grid-column:1/-1"><div class="mc-label">Calorie totali</div><div class="mc-value">2750 <span class="mc-unit">kcal</span></div><div class="mc-sub">Surplus +250 kcal · TDEE ~2500</div></div>
-        <div class="metric-card mc-pro"><div class="mc-label">Proteine</div><div class="mc-value">145 <span class="mc-unit">g</span></div><div class="mc-sub">21% · 580 kcal</div></div>
-        <div class="metric-card mc-carb"><div class="mc-label">Carboidrati</div><div class="mc-value">380 <span class="mc-unit">g</span></div><div class="mc-sub">55% · 1520 kcal</div></div>
-        <div class="metric-card mc-fat" style="grid-column:1/-1"><div class="mc-label">Grassi</div><div class="mc-value">75 <span class="mc-unit">g</span></div><div class="mc-sub">24% · 675 kcal</div></div>
-      </div>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Distribuzione</span></div>
-        <div class="card-body">
-          <div class="macro-section">
-            <div class="macro-row"><span class="macro-lbl lbl-pro">Proteine</span><div class="macro-track"><div class="macro-fill fill-p" style="width:21%"></div></div><span class="macro-val v-pro">145g</span></div>
-            <div class="macro-row"><span class="macro-lbl lbl-carb">Carboidrati</span><div class="macro-track"><div class="macro-fill fill-c" style="width:55%"></div></div><span class="macro-val v-carb">380g</span></div>
-            <div class="macro-row"><span class="macro-lbl lbl-fat">Grassi</span><div class="macro-track"><div class="macro-fill fill-f" style="width:24%"></div></div><span class="macro-val v-fat">75g</span></div>
-          </div>
+    <!-- PARAMETRI UTENTE -->
+    <div class="ai-params-card">
+      <div class="ai-params-title">I tuoi parametri</div>
+      <div class="ai-params-grid">
+        <div class="ai-param">
+          <label class="ai-param-label">Peso (kg)</label>
+          <input class="ai-param-input" type="number" inputmode="decimal" id="param-peso" value="64" min="40" max="150"/>
+        </div>
+        <div class="ai-param">
+          <label class="ai-param-label">Altezza (cm)</label>
+          <input class="ai-param-input" type="number" inputmode="numeric" id="param-altezza" value="176" min="140" max="220"/>
+        </div>
+        <div class="ai-param">
+          <label class="ai-param-label">Età</label>
+          <input class="ai-param-input" type="number" inputmode="numeric" id="param-eta" value="21" min="15" max="80"/>
+        </div>
+        <div class="ai-param">
+          <label class="ai-param-label">Allenamenti/sett</label>
+          <input class="ai-param-input" type="number" inputmode="numeric" id="param-allenamenti" value="4" min="1" max="7"/>
         </div>
       </div>
-      <div class="tip" style="border-color:rgba(139,92,246,0.4)"><div class="tip-tag">Proteine</div><div class="tip-text">Pollo, tacchino, tonno, merluzzo, salmone, uova, ricotta, yogurt greco, carne magra, legumi.</div></div>
-      <div class="tip" style="border-color:rgba(59,130,246,0.4)"><div class="tip-tag">Carboidrati</div><div class="tip-text">Riso, pasta integrale, avena, patate, frutta. Concentra i carbo pre e post workout.</div></div>
-      <div class="tip" style="border-color:rgba(232,137,74,0.4)"><div class="tip-tag">Grassi</div><div class="tip-text">Olio EVO, avocado, frutta secca, uova, salmone. Non scendere sotto i 60g — supportano il testosterone.</div></div>
+      <div class="ai-param" style="margin-top:10px;">
+        <label class="ai-param-label">Intolleranze / preferenze</label>
+        <input class="ai-param-input" type="text" id="param-intolleranze" placeholder="Es: lattosio, vegano, noci..." style="width:100%;"/>
+      </div>
     </div>
 
-    <!-- PROGRESSIONE -->
-    <div class="subpanel" id="nutri-progressione">
-      <div class="phase-card"><div class="phase-num">Fase 01</div><div class="phase-title">Adattamento neuromuscolare</div><div class="phase-weeks">Settimane 1–4</div><div class="phase-desc">Focus tecnica. Carichi moderati (RPE 6–7). Non andare a cedimento. Costruisci le fondamenta.</div></div>
-      <div class="phase-card"><div class="phase-num">Fase 02</div><div class="phase-title">Progressione dei carichi</div><div class="phase-weeks">Settimane 5–8</div><div class="phase-desc">+1.25–2.5 kg ogni volta che completi tutte le rip. RPE 7–8. Puoi avvicinarti al cedimento.</div></div>
-      <div class="phase-card"><div class="phase-num">Fase 03</div><div class="phase-title">Overreaching controllato</div><div class="phase-weeks">Settimane 9–11</div><div class="phase-desc">+1 serie per esercizio principale. Volume alto, recuperi ridotti. RPE 8–9 negli ultimi set.</div></div>
-      <div class="phase-card"><div class="phase-num">Fase 04</div><div class="phase-title">Deload — scarico attivo</div><div class="phase-weeks">Settimana 12</div><div class="phase-desc">Riduci carichi del 40–50%. Il muscolo cresce nel recupero. Poi ripeti con carichi più alti.</div></div>
-      <div class="tip"><div class="tip-tag">Regola d'oro</div><div class="tip-text">Annota peso, serie e ripetizioni ogni sessione. +1 rip. o +1.25 kg rispetto alla precedente. Sempre.</div></div>
+    <!-- GENERATE BUTTON -->
+    <button class="ai-generate-btn" id="ai-gen-btn" onclick="generatePlan()">
+      <span id="ai-gen-text">Genera piano settimanale</span>
+    </button>
+
+    <!-- RISULTATO AI -->
+    <div id="ai-result" style="display:none;">
+
+      <!-- MACRO SUMMARY -->
+      <div class="ai-macro-strip" id="ai-macro-strip"></div>
+
+      <!-- DAY SELECTOR -->
+      <div class="day-pills" id="ai-day-pills" style="margin-bottom:14px;"></div>
+
+      <!-- PIANO GIORNALIERO -->
+      <div id="ai-day-plan"></div>
+
+      <!-- LISTA SPESA -->
+      <div class="ai-spesa-wrap">
+        <div class="ai-spesa-header" onclick="toggleSpesa()">
+          <span class="ai-spesa-title">Lista della spesa</span>
+          <span id="spesa-arrow">↓</span>
+        </div>
+        <div id="ai-spesa-list" style="display:none;"></div>
+      </div>
+
+      <!-- RIGENERA -->
+      <button class="ai-regen-btn" onclick="generatePlan()">↺ Rigenera piano</button>
     </div>
 
-    <!-- CONSIGLI -->
-    <div class="subpanel" id="nutri-consigli">
-      <div class="tip"><div class="tip-tag">Pre-workout 6:10</div><div class="tip-text">Corpo in deficit glicemico al mattino. Senza carbo rischi cali di forza. Banana + gallette = soluzione rapida.</div></div>
-      <div class="tip"><div class="tip-tag">Riscaldamento (mai saltarlo)</div><div class="tip-text">5 min cardio + mobilità + 2 serie al 40–50% del carico. Al mattino le articolazioni sono più rigide.</div></div>
-      <div class="tip"><div class="tip-tag">Sonno — il terzo pilastro</div><div class="tip-text">A letto entro le 23:00. Il GH viene secreto nelle prime ore di sonno profondo. Meno di 7h = meno massa.</div></div>
-      <div class="tip"><div class="tip-tag">Idratazione</div><div class="tip-text">500ml appena sveglio. Disidratazione del 1–2% riduce la forza. Target: 2.5–3 litri/giorno.</div></div>
-      <div class="tip"><div class="tip-tag">Tecnica prima dei carichi</div><div class="tip-text">Prime 4 settimane: usa carichi con cui potresti fare 5 rip. in più. Un infortunio ti ferma settimane.</div></div>
+    <!-- EMPTY STATE -->
+    <div id="ai-empty" style="text-align:center;padding:40px 20px;">
+      <div style="display:flex;justify-content:center;margin-bottom:16px;">
+        <svg width="52" height="44" viewBox="0 0 52 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Piatto centrale, centrato -->
+          <circle cx="26" cy="24" r="12" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
+          <circle cx="26" cy="24" r="7.5" stroke="rgba(255,255,255,0.1)" stroke-width="1.2"/>
+          <!-- Forchetta sx: allineata verticalmente al centro del piatto -->
+          <line x1="8" y1="6" x2="8" y2="42" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="6" y1="6" x2="6" y2="14" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="10" y1="6" x2="10" y2="14" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M6 14 Q8 17.5 10 14" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- Coltello dx: stessa altezza -->
+          <line x1="44" y1="6" x2="44" y2="42" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M44 6 C44 6 49 9 49 15 L44 15" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">Nessun piano generato</div>
+      <div style="font-size:11px;color:var(--text3);line-height:1.6;">Imposta il tuo obiettivo, verifica i parametri e premi <strong style="color:var(--text2);">Genera</strong> per ricevere il tuo piano settimanale personalizzato.</div>
     </div>
+
   </div>
 
   <!-- ══════════ PAGE: PROGRESSI ══════════ -->
@@ -548,27 +897,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <p class="page-sub">Target: 2500 ml/giorno</p>
 
     <div class="water-drop-wrap">
-      <svg id="water-drop-svg" width="140" height="168" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <clipPath id="dropClip">
-            <path d="M75,8 C75,8 20,75 20,115 C20,145 45,168 75,168 C105,168 130,145 130,115 C130,75 75,8 75,8 Z"/>
-          </clipPath>
-          <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#93c5fd"/>
-            <stop offset="100%" stop-color="#1d4ed8"/>
-          </linearGradient>
-        </defs>
-        <path d="M75,8 C75,8 20,75 20,115 C20,145 45,168 75,168 C105,168 130,145 130,115 C130,75 75,8 75,8 Z" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/>
-        <g clip-path="url(#dropClip)">
-          <rect id="water-fill-rect" x="0" y="168" width="150" height="160" fill="url(#waterGrad)" opacity="0.85"/>
-          <path id="water-wave" fill="rgba(147,197,253,0.6)">
-            <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
-              values="M-10,0 Q20,-8 50,0 Q80,8 110,0 Q140,-8 170,0 L170,30 L-10,30 Z;M-10,0 Q20,8 50,0 Q80,-8 110,0 Q140,8 170,0 L170,30 L-10,30 Z;M-10,0 Q20,-8 50,0 Q80,8 110,0 Q140,-8 170,0 L170,30 L-10,30 Z"/>
-          </path>
-        </g>
-        <text id="drop-ml-text" x="75" y="122" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="22" fill="white">0</text>
-        <text x="75" y="138" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="500" font-size="10" fill="rgba(255,255,255,0.5)">ml</text>
-      </svg>
+      <div style="position:relative;width:140px;height:168px;">
+        <!-- Canvas for organic water animation (below) -->
+        <canvas id="water-canvas" width="150" height="180" style="position:absolute;top:0;left:0;width:140px;height:168px;z-index:1;"></canvas>
+        <!-- Drop outline + text SVG (above) -->
+        <svg width="140" height="168" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;z-index:2;">
+          <text id="drop-ml-text" x="75" y="122" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="22" fill="white" style="filter:drop-shadow(0 1px 4px rgba(0,0,0,0.8));">0</text>
+          <text x="75" y="138" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="500" font-size="10" fill="rgba(255,255,255,0.7)" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));">ml</text>
+        </svg>
+      </div>
     </div>
 
     <div class="water-pct" id="water-pct">0% del target giornaliero</div>
@@ -611,13 +948,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="page-tag">Personalizzazione</div>
     <h1 class="page-title">Modifica il<br><span>piano</span></h1>
 
-    <div class="section-divider">Esercizi</div>
+    <div class="section-divider">Tipo di allenamento</div>
     <div class="day-pills" id="custom-pills">
       <div class="day-pill active" onclick="selectCustomDay('push',this)">Push Day</div>
       <div class="day-pill" onclick="selectCustomDay('pull',this)">Pull Day</div>
       <div class="day-pill" onclick="selectCustomDay('legs',this)">Leg Day</div>
       <div class="day-pill" onclick="selectCustomDay('upper',this)">Upper Day</div>
     </div>
+
     <div class="card">
       <div class="card-body" id="custom-ex-list"></div>
     </div>
@@ -625,31 +963,26 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <input class="add-input" id="custom-new-ex" placeholder="Aggiungi esercizio..." type="text" inputmode="text">
       <button class="add-btn" onclick="addCustomEx()">+</button>
     </div>
+
+    <div class="section-divider">Assegna a un giorno</div>
+    <div class="section-sub">Scegli il giorno in cui vuoi assegnare questo allenamento</div>
+    <div class="week-strip" id="assign-day-strip"></div>
+
     <button class="save-btn" onclick="saveCustomPlan()">Salva piano</button>
     <div class="saved-toast" id="custom-toast">✓ Piano aggiornato</div>
 
-    <div class="section-divider">Giorni attivi</div>
-    <div class="week-strip" id="active-days-strip"></div>
-    <button class="save-btn" onclick="saveActiveDays()">Salva giorni</button>
-    <div class="saved-toast" id="days-toast">✓ Giorni salvati</div>
+    <div class="section-divider">Calendario settimanale</div>
+    <div class="section-sub">Tieni premuto e trascina per spostare un allenamento da un giorno all'altro</div>
+    <div id="week-calendar"></div>
+    <button class="save-btn" onclick="saveCalendar()">Salva calendario</button>
+    <div class="saved-toast" id="cal-toast">✓ Calendario salvato</div>
   </div>
 
 </div><!-- end scroll-area -->
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-tab active" id="nav-overview" onclick="switchPage('overview',this)">
-    <div class="nav-tab-dot"></div>
-    <div class="nav-tab-icon">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="12" width="5" height="8" rx="1.5" fill="currentColor" opacity="0.5"/>
-        <rect x="8.5" y="7" width="5" height="13" rx="1.5" fill="currentColor" opacity="0.75"/>
-        <rect x="15" y="2" width="5" height="18" rx="1.5" fill="currentColor"/>
-      </svg>
-    </div>
-    <div class="nav-tab-label">Piano</div>
-  </button>
-  <button class="nav-tab" id="nav-allenamento" onclick="switchPage('allenamento',this)">
+  <button class="nav-tab active" id="nav-allenamento" onclick="switchPage('allenamento',this)">
     <div class="nav-tab-dot"></div>
     <div class="nav-tab-icon">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -666,12 +999,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="nav-tab-dot"></div>
     <div class="nav-tab-icon">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <path d="M11 3C11 3 5 7 5 13C5 16.3 7.7 19 11 19C14.3 19 17 16.3 17 13C17 7 11 3 11 3Z" stroke="currentColor" stroke-width="1.8" fill="none"/>
-        <line x1="11" y1="10" x2="11" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="8" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M11 19 C11 19 3 13.5 3 8 C3 5.2 5.2 3 8 3 C9.5 3 10.8 3.7 11 4.5 C11.2 3.7 12.5 3 14 3 C16.8 3 19 5.2 19 8 C19 13.5 11 19 11 19Z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
-    <div class="nav-tab-label">Nutri</div>
+    <div class="nav-tab-label">Alimentazione</div>
   </button>
   <button class="nav-tab" id="nav-progressi" onclick="switchPage('progressi',this)">
     <div class="nav-tab-dot"></div>
@@ -711,7 +1042,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 // ═══════════════════════════════════
 // PAGE NAVIGATION
 // ═══════════════════════════════════
-let currentPage = 'overview';
+let currentPage = 'allenamento';
 
 function switchPage(pageId, tabEl) {
   if(currentPage === pageId) return;
@@ -721,7 +1052,12 @@ function switchPage(pageId, tabEl) {
   document.getElementById('page-'+pageId).classList.add('active');
   tabEl.classList.add('active');
   document.getElementById('scroll-area').scrollTop = 0;
-  if(pageId==='idratazione'){ updateWaterUI(); setTimeout(renderWaterChart,60); }
+  if(pageId==='idratazione'){
+    updateWaterUI();
+    setTimeout(renderWaterChart, 60);
+    // Restart canvas if needed
+    if(!waterAnimId) initWaterCanvas();
+  }
 }
 
 // ═══════════════════════════════════
@@ -757,15 +1093,41 @@ function selectLogDay(day, el) {
   renderLogList();
 }
 
+function stepVal(id, delta) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const current = parseFloat(el.value) || 0;
+  const next = Math.max(0, Math.round((current + delta) * 10) / 10);
+  el.value = next || '';
+}
+
 function renderLogList() {
   const list = document.getElementById('ex-log-list');
   const exercises = customPlan[currentLogDay] || [];
   list.innerHTML = exercises.map((ex,i) => `
     <div class="ex-log-row" id="lrow-${i}">
       <div class="ex-log-name">${ex}</div>
-      <input class="ex-log-input" type="number" inputmode="decimal" placeholder="–" min="0" step="0.5" id="lkg-${i}"/>
-      <input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lset-${i}"/>
-      <input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lrip-${i}"/>
+      <div class="stepper">
+        <input class="stepper-val" type="number" inputmode="decimal" placeholder="–" min="0" step="0.5" id="lkg-${i}"/>
+        <div class="stepper-btns">
+          <button class="stepper-btn" onclick="stepVal('lkg-${i}',-0.5)">−</button>
+          <button class="stepper-btn" onclick="stepVal('lkg-${i}',0.5)">+</button>
+        </div>
+      </div>
+      <div class="stepper">
+        <input class="stepper-val" type="number" inputmode="numeric" placeholder="–" min="0" id="lset-${i}"/>
+        <div class="stepper-btns">
+          <button class="stepper-btn" onclick="stepVal('lset-${i}',-1)">−</button>
+          <button class="stepper-btn" onclick="stepVal('lset-${i}',1)">+</button>
+        </div>
+      </div>
+      <div class="stepper">
+        <input class="stepper-val" type="number" inputmode="numeric" placeholder="–" min="0" id="lrip-${i}"/>
+        <div class="stepper-btns">
+          <button class="stepper-btn" onclick="stepVal('lrip-${i}',-1)">−</button>
+          <button class="stepper-btn" onclick="stepVal('lrip-${i}',1)">+</button>
+        </div>
+      </div>
       <button class="ex-log-del" onclick="delLogRow(${i})">×</button>
     </div>
   `).join('');
@@ -785,7 +1147,11 @@ function addLogEx() {
   const i = rows.length;
   const row = document.createElement('div');
   row.className = 'ex-log-row'; row.id = 'lrow-'+i;
-  row.innerHTML = `<div class="ex-log-name">${name}</div><input class="ex-log-input" type="number" inputmode="decimal" placeholder="–" min="0" step="0.5" id="lkg-${i}"/><input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lset-${i}"/><input class="ex-log-input" type="number" inputmode="numeric" placeholder="–" min="0" id="lrip-${i}"/><button class="ex-log-del" onclick="delLogRow(${i})">×</button>`;
+  row.innerHTML = `<div class="ex-log-name">${name}</div>
+    <div class="stepper"><input class="stepper-val" type="number" inputmode="decimal" placeholder="–" min="0" step="0.5" id="lkg-${i}"/><div class="stepper-btns"><button class="stepper-btn" onclick="stepVal('lkg-${i}',-0.5)">−</button><button class="stepper-btn" onclick="stepVal('lkg-${i}',0.5)">+</button></div></div>
+    <div class="stepper"><input class="stepper-val" type="number" inputmode="numeric" placeholder="–" min="0" id="lset-${i}"/><div class="stepper-btns"><button class="stepper-btn" onclick="stepVal('lset-${i}',-1)">−</button><button class="stepper-btn" onclick="stepVal('lset-${i}',1)">+</button></div></div>
+    <div class="stepper"><input class="stepper-val" type="number" inputmode="numeric" placeholder="–" min="0" id="lrip-${i}"/><div class="stepper-btns"><button class="stepper-btn" onclick="stepVal('lrip-${i}',-1)">−</button><button class="stepper-btn" onclick="stepVal('lrip-${i}',1)">+</button></div></div>
+    <button class="ex-log-del" onclick="delLogRow(${i})">×</button>`;
   document.getElementById('ex-log-list').appendChild(row);
   inp.value = '';
 }
@@ -811,15 +1177,24 @@ function renderHistory() {
   const el = document.getElementById('history-list');
   const names = {push:'Push Day',pull:'Pull Day',legs:'Leg Day',upper:'Upper Day'};
   if(!sessions.length) { el.innerHTML='<div class="empty-state">Nessuna sessione ancora.</div>'; return; }
-  el.innerHTML = sessions.slice(0,6).map(s=>`
-    <div class="hist-item">
+  el.innerHTML = sessions.map((s,i)=>`
+    <div class="hist-item" id="hist-${i}">
       <div class="hist-top">
         <span class="hist-day">${names[s.day]||s.day}</span>
-        <span class="hist-date">${s.date}</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="hist-date">${s.date}</span>
+          <button onclick="deleteSession(${i})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:2px 4px;transition:color 0.15s;line-height:1;" onmouseenter="this.style.color='var(--red)'" onmouseleave="this.style.color='var(--text3)'">×</button>
+        </div>
       </div>
       ${s.exercises.map(e=>`<div class="hist-ex"><span>${e.name}</span><span class="hist-ex-val">${e.kg}kg · ${e.set}×${e.rip}</span></div>`).join('')}
     </div>
   `).join('');
+}
+
+function deleteSession(i) {
+  sessions.splice(i, 1);
+  localStorage.setItem('fitos_sessions', JSON.stringify(sessions));
+  renderHistory();
 }
 
 // ═══════════════════════════════════
@@ -829,8 +1204,6 @@ const WATER_TARGET = 2500;
 let waterData = JSON.parse(localStorage.getItem('fitos_water') || '{}');
 let reminderOn = false;
 let reminderInterval = null;
-let currentFillY = 168;
-let animFrameId = null;
 
 function todayKey() { return new Date().toISOString().split('T')[0]; }
 function getTodayWater() { return waterData[todayKey()]||0; }
@@ -844,44 +1217,147 @@ function addWater(ml) {
 }
 
 function resetWater() {
-  waterData[todayKey()] = 0;
-  localStorage.setItem('fitos_water', JSON.stringify(waterData));
-  updateWaterUI();
-  setTimeout(renderWaterChart, 50);
+  // First animate bars down to 0 smoothly
+  document.querySelectorAll('.wc-fill').forEach(el => {
+    el.style.transition = 'height 1s cubic-bezier(0.4,0,0.2,1)';
+    el.style.height = '0px';
+  });
+  // Simultaneously animate drop down, then update data and re-render
+  animateWaterFill(168, () => {
+    waterData[todayKey()] = 0;
+    localStorage.setItem('fitos_water', JSON.stringify(waterData));
+    updateWaterUI();
+    setTimeout(renderWaterChart, 50);
+  });
 }
 
-function easeOutBack(t) {
-  const c1=1.2,c3=c1+1;
-  return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
 }
 
-function animateWaterFill(targetY) {
-  if(animFrameId) cancelAnimationFrame(animFrameId);
-  const startY = currentFillY;
-  const startTime = performance.now();
-  const duration = 900;
-  function step(now) {
-    const t = Math.min((now-startTime)/duration,1);
-    const y = startY+(targetY-startY)*easeOutBack(t);
-    currentFillY = y;
-    const rect = document.getElementById('water-fill-rect');
-    const wave = document.getElementById('water-wave');
-    if(rect) rect.setAttribute('y',y);
-    if(wave) wave.setAttribute('transform',`translate(0,${y-10})`);
-    if(t<1) animFrameId = requestAnimationFrame(step);
-    else currentFillY = targetY;
+// ── ORGANIC WATER CANVAS ──
+let waterCanvasY = 180;
+let waterTargetY = 180;
+let waterVelocity = 0;
+let waterAnimId = null;
+const WATER_SPRING = 0.08;   // spring stiffness
+const WATER_DAMPING = 0.72;  // damping (lower = more oscillation)
+
+function initWaterCanvas() {
+  const canvas = document.getElementById('water-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 150, H = 180;
+
+  // Drop clipping path
+  function dropPath(ctx) {
+    ctx.beginPath();
+    ctx.moveTo(75, 8);
+    ctx.bezierCurveTo(75, 8, 20, 75, 20, 115);
+    ctx.bezierCurveTo(20, 145, 45, 168, 75, 168);
+    ctx.bezierCurveTo(105, 168, 130, 145, 130, 115);
+    ctx.bezierCurveTo(130, 75, 75, 8, 75, 8);
+    ctx.closePath();
   }
-  animFrameId = requestAnimationFrame(step);
+
+  let t = 0;
+  // Wave points for organic surface
+  const NUM_POINTS = 8;
+
+  function drawWater() {
+    ctx.clearRect(0, 0, W, H);
+    t += 0.035;
+
+    // Spring physics towards target
+    const force = (waterTargetY - waterCanvasY) * WATER_SPRING;
+    waterVelocity = (waterVelocity + force) * WATER_DAMPING;
+    waterCanvasY += waterVelocity;
+
+    if(waterCanvasY >= 178) { waterCanvasY = 178; waterVelocity = 0; }
+    if(waterCanvasY <= 9) { waterCanvasY = 9; waterVelocity = 0; }
+
+    const surfaceY = waterCanvasY;
+    const fillH = H - surfaceY;
+
+    if(fillH > 1) {
+      ctx.save();
+      dropPath(ctx);
+      ctx.clip();
+
+      // Compute wave points
+      const wavePoints = [];
+      for(let i = 0; i <= NUM_POINTS + 1; i++) {
+        const x = (i / NUM_POINTS) * (W + 20) - 10;
+        const wave1 = Math.sin(t + i * 0.8) * 4;
+        const wave2 = Math.sin(t * 1.3 + i * 1.4) * 2.5;
+        const wave3 = Math.sin(t * 0.7 + i * 2.1) * 1.5;
+        const wobble = Math.sin(t * 3 + i * 0.5) * Math.abs(waterVelocity) * 1.2;
+        wavePoints.push({x, y: surfaceY + wave1 + wave2 + wave3 + wobble});
+      }
+
+      // Single clean water shape
+      ctx.beginPath();
+      ctx.moveTo(-10, surfaceY);
+      wavePoints.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(W + 10, H);
+      ctx.lineTo(-10, H);
+      ctx.closePath();
+
+      // Original water colors
+      const grad = ctx.createLinearGradient(0, surfaceY, 0, H);
+      grad.addColorStop(0,  'rgba(147,197,253,0.85)');
+      grad.addColorStop(1,  'rgba(29,78,216,0.95)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.restore();
+
+      // Drop outline — drawn AFTER clip restore so it's always on top
+      ctx.save();
+      dropPath(ctx);
+      ctx.strokeStyle = 'rgba(96,165,250,0.7)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      // Empty drop — show outline only
+      ctx.save();
+      dropPath(ctx);
+      ctx.strokeStyle = 'rgba(96,165,250,0.35)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    waterAnimId = requestAnimationFrame(drawWater);
+  }
+
+  waterAnimId = requestAnimationFrame(drawWater);
+}
+
+function animateWaterFill(targetY, onComplete) {
+  // targetY: 168=empty(0%), 8=full(100%) — same scale as before
+  waterTargetY = targetY;
+  // onComplete fires when spring settles
+  if(onComplete) {
+    const check = setInterval(() => {
+      if(Math.abs(waterCanvasY - targetY) < 0.5 && Math.abs(waterVelocity) < 0.1) {
+        clearInterval(check);
+        onComplete();
+      }
+    }, 100);
+  }
 }
 
 function updateWaterUI() {
   const amount = getTodayWater();
-  const pct = Math.min(100,Math.round(amount/WATER_TARGET*100));
+  const pct = Math.min(100, Math.round(amount/WATER_TARGET*100));
   const el_pct = document.getElementById('water-pct');
   const dropMl = document.getElementById('drop-ml-text');
   if(el_pct) el_pct.textContent = pct+'% del target giornaliero';
   if(dropMl) dropMl.textContent = amount;
-  animateWaterFill(168-(160*pct/100));
+  // targetY: 168=empty, 8=full
+  animateWaterFill(168 - (160*pct/100));
 }
 
 function renderWaterChart() {
@@ -899,19 +1375,22 @@ function renderWaterChart() {
   chart.innerHTML = days.map((d,idx)=>{
     const isToday = d.key===todayKey();
     const fillH = Math.round((d.val/maxVal)*trackH);
-    const delay = (idx*60)+'ms';
+    const delay = (idx*50)+'ms';
     return `<div class="wc-col">
       <div class="wc-val" style="color:${isToday?'#60a5fa':'var(--text3)'};">${d.val>0?d.val:''}</div>
       <div class="wc-track" style="height:${trackH}px;">
         <div style="position:absolute;left:0;right:0;bottom:${Math.round((WATER_TARGET/maxVal)*trackH)}px;border-top:1px dashed rgba(96,165,250,0.25);"></div>
-        <div class="wc-fill" style="height:0;opacity:${isToday?1:0.55};transition:height 1s cubic-bezier(0.34,1.1,0.64,1) ${delay};" data-h="${fillH}"></div>
+        <div class="wc-fill" style="height:0;opacity:${isToday?1:0.55};transition:height 1s cubic-bezier(0.4,0,0.2,1) ${delay};" data-h="${fillH}"></div>
       </div>
       <div class="wc-lbl" style="color:${isToday?'#60a5fa':'var(--text3)'};">${d.lbl}</div>
     </div>`;
   }).join('');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    document.querySelectorAll('.wc-fill').forEach(el=>el.style.height=el.dataset.h+'px');
-  }));
+  // Triple rAF for reliable paint before animating
+  requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll('.wc-fill').forEach(el=>{
+      el.style.height = el.dataset.h + 'px';
+    });
+  })));
 }
 
 function toggleReminder() {
@@ -924,7 +1403,7 @@ function toggleReminder() {
     if(Notification.permission==='default') Notification.requestPermission();
     reminderInterval = setInterval(()=>{
       const msg='💧 Hai bevuto '+getTodayWater()+'ml oggi. Bevi qualcosa!';
-      if(Notification.permission==='granted') new Notification('FitOS',{body:msg});
+      if(Notification.permission==='granted') new Notification('ORBT',{body:msg});
       else alert(msg);
     },45*60*1000);
   } else {
@@ -934,8 +1413,18 @@ function toggleReminder() {
 }
 
 // ═══════════════════════════════════
-// CUSTOMIZATION
+// CUSTOMIZATION + CALENDAR
 // ═══════════════════════════════════
+const DAYS_IT = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+const DAY_KEYS = ['lun','mar','mer','gio','ven','sab','dom'];
+const WORKOUT_NAMES = {push:'Push Day',pull:'Pull Day',legs:'Leg Day',upper:'Upper Day',riposo:'Riposo'};
+
+// calendar: maps day key → workout type or null
+let calendar = JSON.parse(localStorage.getItem('fitos_calendar') || 'null') || {
+  lun:'push', mar:null, mer:'pull', gio:null, ven:'legs', sab:null, dom:null
+};
+let selectedAssignDay = null; // which day is selected in assign strip
+
 function selectCustomDay(day, el) {
   currentCustomDay = day;
   document.querySelectorAll('#custom-pills .day-pill').forEach(b=>b.classList.remove('active'));
@@ -964,40 +1453,855 @@ function addCustomEx(){
 }
 
 function saveCustomPlan(){
+  // also assign to selected day if one is selected
+  if(selectedAssignDay) {
+    calendar[selectedAssignDay] = currentCustomDay;
+    localStorage.setItem('fitos_calendar', JSON.stringify(calendar));
+    renderCalendar();
+  }
   localStorage.setItem('fitos_plan',JSON.stringify(customPlan));
   const t=document.getElementById('custom-toast');
   t.style.display='block'; setTimeout(()=>t.style.display='none',2500);
   renderLogList();
 }
 
-// ═══════════════════════════════════
-// ACTIVE DAYS
-// ═══════════════════════════════════
-const DAYS_IT=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
-let activeDays = JSON.parse(localStorage.getItem('fitos_days')||'[0,2,4]');
-
-function renderActiveDays(){
-  const strip = document.getElementById('active-days-strip');
+// ── ASSIGN DAY STRIP ──
+function renderAssignStrip() {
+  const strip = document.getElementById('assign-day-strip');
   if(!strip) return;
+  strip.className = 'assign-strip';
   strip.innerHTML = DAYS_IT.map((d,i)=>`
-    <div class="wsd ${activeDays.includes(i)?'on':''}" onclick="toggleDay(${i})" id="aday-${i}">
-      <div class="wsd-name">${d}</div>
-      <div class="wsd-dot"></div>
-      <div class="wsd-bar"></div>
+    <div class="asd ${selectedAssignDay===DAY_KEYS[i]?'selected':''}" onclick="selectAssignDay('${DAY_KEYS[i]}',this)" id="asd-${DAY_KEYS[i]}">
+      <div class="asd-name">${d}</div>
+      <div class="asd-dot"></div>
+      <div class="asd-bar"></div>
     </div>
   `).join('');
 }
 
-function toggleDay(i){
-  const idx=activeDays.indexOf(i);
-  if(idx>-1) activeDays.splice(idx,1); else activeDays.push(i);
-  renderActiveDays();
+function selectAssignDay(key, el) {
+  selectedAssignDay = key;
+  document.querySelectorAll('.asd').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
-function saveActiveDays(){
-  localStorage.setItem('fitos_days',JSON.stringify(activeDays));
-  const t=document.getElementById('days-toast');
+// ── CALENDAR WITH DRAG & DROP ──
+let draggedDay = null;
+
+function renderCalendar() {
+  const cal = document.getElementById('week-calendar');
+  if(!cal) return;
+  cal.innerHTML = `<div class="cal-week">${DAY_KEYS.map((key,i)=>{
+    const workout = calendar[key];
+    const name = workout ? WORKOUT_NAMES[workout] : null;
+    const exercises = workout ? (customPlan[workout] || []) : [];
+    return `
+      <div class="cal-band ${workout?'has-workout':''}" id="calband-${key}"
+        ondragover="calDragOver(event,'${key}')"
+        ondragleave="calDragLeave('${key}')"
+        ondrop="calDrop(event,'${key}')"
+        ondragend="calDragEnd(event)"
+        ondragstart="calDragStart(event,'${key}')"
+        draggable="${workout?'true':'false'}"
+        ontouchstart="calTouchStart(event,'${key}')"
+        ontouchmove="calTouchMove(event)"
+        ontouchend="calTouchEnd(event,'${key}')">
+        <div class="cal-band-header">
+          <div class="cal-band-name">${DAYS_IT[i]}</div>
+        </div>
+        <div class="cal-band-body">
+          ${workout
+            ? `<div class="cal-band-type">${name}</div>
+               ${exercises.slice(0,6).map(ex=>`<div class="cal-band-ex">${ex}</div>`).join('')}
+               ${exercises.length > 6 ? `<div style="font-size:8px;color:var(--text3);text-align:center;">+${exercises.length-6}</div>` : ''}
+               <button class="cal-band-del" onclick="removeCalDay('${key}')">×</button>`
+            : `<div class="cal-band-empty">–</div>`
+          }
+        </div>
+        ${workout ? `<div class="cal-band-drag-handle">⠿</div>` : ''}
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
+// Desktop drag & drop
+function calDragStart(e, fromDay) {
+  draggedDay = fromDay;
+  if(e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+  // Add dragging class for ghost effect
+  setTimeout(()=>document.getElementById('calband-'+fromDay)?.classList.add('dragging'),0);
+}
+function calDragOver(e, toDay) {
+  e.preventDefault();
+  if(draggedDay && draggedDay !== toDay) {
+    document.querySelectorAll('.cal-band').forEach(b=>b.classList.remove('drag-over'));
+    document.getElementById('calband-'+toDay)?.classList.add('drag-over');
+  }
+}
+function calDragLeave(toDay) {
+  document.getElementById('calband-'+toDay)?.classList.remove('drag-over');
+}
+function calDrop(e, toDay) {
+  e.preventDefault();
+  document.querySelectorAll('.cal-band').forEach(b=>{b.classList.remove('drag-over');b.classList.remove('dragging');});
+  if(!draggedDay || draggedDay === toDay) return;
+  swapCalDays(draggedDay, toDay);
+  draggedDay = null;
+}
+function calDragEnd(e) {
+  document.querySelectorAll('.cal-band').forEach(b=>{b.classList.remove('dragging');b.classList.remove('drag-over');});
+  draggedDay = null;
+}
+
+function swapCalDays(a, b) {
+  const tmp = calendar[b];
+  calendar[b] = calendar[a];
+  calendar[a] = tmp;
+  renderCalendar();
+}
+
+// ── TOUCH DRAG WITH 3D CLONE ──
+let touchDragDay = null;
+let touchClone = null;
+let touchStartX = 0;
+let touchStartY = 0;
+
+function calTouchStart(e, day) {
+  if(!calendar[day]) return;
+  touchDragDay = day;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+
+  // Build 3D floating clone from the band
+  const band = document.getElementById('calband-'+day);
+  const rect = band.getBoundingClientRect();
+
+  touchClone = document.createElement('div');
+  touchClone.id = 'drag-clone-3d';
+  touchClone.style.width = rect.width+'px';
+  touchClone.style.left = rect.left+'px';
+  touchClone.style.top = rect.top+'px';
+  touchClone.innerHTML = band.innerHTML;
+  touchClone.style.transform = 'scale(1) rotateX(0deg) rotateZ(0deg)';
+  document.body.appendChild(touchClone);
+
+  // Animate lift
+  requestAnimationFrame(()=>{
+    touchClone.style.transition = 'transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s';
+    touchClone.style.transform = 'scale(1.08) rotateX(6deg) rotateZ(-1.5deg)';
+    touchClone.style.boxShadow = '0 28px 56px rgba(0,0,0,0.7), 0 8px 20px rgba(255,255,255,0.08), 0 0 0 1.5px rgba(255,255,255,0.2)';
+  });
+
+  band.classList.add('dragging');
+}
+
+function calTouchMove(e) {
+  if(!touchClone || !touchDragDay) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+
+  // Move clone following finger
+  const band = document.getElementById('calband-'+touchDragDay);
+  const rect = band.getBoundingClientRect();
+  const rotZ = Math.max(-8, Math.min(8, dx * 0.06));
+  const rotX = Math.max(-6, Math.min(6, -dy * 0.04));
+
+  touchClone.style.transition = 'none';
+  touchClone.style.left = (rect.left + dx)+'px';
+  touchClone.style.top = (rect.top + dy)+'px';
+  touchClone.style.transform = `scale(1.08) rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
+
+  // Highlight target band
+  document.querySelectorAll('.cal-band').forEach(b=>b.classList.remove('drag-over'));
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const target = el?.closest('.cal-band');
+  if(target && target.id !== 'calband-'+touchDragDay) {
+    target.classList.add('drag-over');
+  }
+}
+
+function calTouchEnd(e, fromDay) {
+  document.querySelectorAll('.cal-band').forEach(b=>{b.classList.remove('drag-over');b.classList.remove('dragging');});
+
+  if(touchClone) {
+    // Drop animation
+    touchClone.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+    touchClone.style.transform = 'scale(0.95) rotateX(0deg) rotateZ(0deg)';
+    touchClone.style.opacity = '0';
+    setTimeout(()=>{ touchClone?.remove(); touchClone = null; }, 200);
+  }
+
+  if(!touchDragDay) return;
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const target = el?.closest('.cal-band');
+  if(target) {
+    const toDay = target.id.replace('calband-','');
+    if(toDay !== touchDragDay) swapCalDays(touchDragDay, toDay);
+  }
+  touchDragDay = null;
+}
+
+function removeCalDay(key) {
+  calendar[key] = null;
+  renderCalendar();
+}
+
+function saveCalendar() {
+  localStorage.setItem('fitos_calendar', JSON.stringify(calendar));
+  const t=document.getElementById('cal-toast');
   t.style.display='block'; setTimeout(()=>t.style.display='none',2500);
+}
+
+// ═══════════════════════════════════
+// AI ALIMENTAZIONE
+// ═══════════════════════════════════
+let currentGoal = 'massa';
+let currentWeekPlan = null;
+let currentAiDay = 0;
+let spesaOpen = false;
+
+function setGoal(goal, el) {
+  currentGoal = goal;
+  document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function generatePlan() {
+  const peso = document.getElementById('param-peso').value || 64;
+  const altezza = document.getElementById('param-altezza').value || 176;
+  const eta = document.getElementById('param-eta').value || 21;
+  const allenamenti = document.getElementById('param-allenamenti').value || 4;
+  const intolleranze = document.getElementById('param-intolleranze').value || 'nessuna';
+
+  // UI loading
+  const btn = document.getElementById('ai-gen-btn');
+  const btnText = document.getElementById('ai-gen-text');
+  btn.classList.add('loading');
+  btnText.innerHTML = '<div class="ai-loading-dots"><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div></div>';
+  document.getElementById('ai-empty').style.display = 'none';
+  document.getElementById('ai-result').style.display = 'none';
+
+  const obiettivo = currentGoal === 'massa' ? 'aumento massa muscolare (bulk pulito)' : 'definizione muscolare (taglio grasso)';
+
+  const prompt = `Sei un nutrizionista sportivo esperto. Crea un piano alimentare settimanale completo per:
+- Peso: ${peso}kg, Altezza: ${altezza}cm, Età: ${eta} anni, Sesso: M
+- Obiettivo: ${obiettivo}
+- Allenamenti settimanali: ${allenamenti} (mattina ore 6:40)
+- Intolleranze/preferenze: ${intolleranze}
+
+Genera un piano per 7 giorni (Lunedì-Domenica) con pasti diversi ogni giorno.
+Rispondi SOLO con un JSON valido in questo formato esatto, senza testo aggiuntivo:
+{
+  "obiettivo": "${obiettivo}",
+  "calorie_giornaliere": 2750,
+  "macros": {"proteine_g": 145, "carboidrati_g": 380, "grassi_g": 75},
+  "giorni": [
+    {
+      "giorno": "Lunedì",
+      "calorie_totali": 2750,
+      "pasti": [
+        {
+          "nome": "Pre-Workout",
+          "orario": "06:10",
+          "alimento": "Nome del pasto",
+          "descrizione": "Ingredienti e quantità dettagliate",
+          "calorie": 300,
+          "macros": {"proteine_g": 10, "carboidrati_g": 45, "grassi_g": 5}
+        }
+      ]
+    }
+  ],
+  "lista_spesa": {
+    "Proteine": ["Petto di pollo 800g", "Uova 12pz"],
+    "Carboidrati": ["Riso integrale 500g"],
+    "Grassi": ["Olio EVO 250ml"],
+    "Verdure": ["Spinaci 300g"],
+    "Frutta": ["Banane 6pz"]
+  }
+}
+Includi 5 pasti al giorno: Pre-Workout, Post-Workout/Colazione, Pranzo, Spuntino, Cena. Varia i pasti ogni giorno.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content[0].text;
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('No JSON');
+    currentWeekPlan = JSON.parse(jsonMatch[0]);
+    renderAiPlan();
+  } catch(e) {
+    btnText.innerHTML = 'Genera piano settimanale';
+    btn.classList.remove('loading');
+    document.getElementById('ai-empty').style.display = 'block';
+    document.getElementById('ai-empty').innerHTML = '<div style="font-size:36px;margin-bottom:12px;">⚠️</div><div style="font-size:12px;color:var(--text2);">Errore nella generazione. Riprova.</div>';
+  }
+}
+
+function renderAiPlan() {
+  const btn = document.getElementById('ai-gen-btn');
+  const btnText = document.getElementById('ai-gen-text');
+  btn.classList.remove('loading');
+  btnText.innerHTML = 'Genera piano settimanale';
+
+  const plan = currentWeekPlan;
+  document.getElementById('ai-result').style.display = 'block';
+  document.getElementById('ai-empty').style.display = 'none';
+
+  // Macro strip
+  document.getElementById('ai-macro-strip').innerHTML = `
+    <div class="ai-macro-chip chip-kcal"><div class="ai-macro-chip-val">${plan.calorie_giornaliere}</div><div class="ai-macro-chip-lbl">kcal</div></div>
+    <div class="ai-macro-chip chip-pro"><div class="ai-macro-chip-val">${plan.macros.proteine_g}g</div><div class="ai-macro-chip-lbl">Prot.</div></div>
+    <div class="ai-macro-chip chip-carb"><div class="ai-macro-chip-val">${plan.macros.carboidrati_g}g</div><div class="ai-macro-chip-lbl">Carb.</div></div>
+    <div class="ai-macro-chip chip-fat"><div class="ai-macro-chip-val">${plan.macros.grassi_g}g</div><div class="ai-macro-chip-lbl">Grassi</div></div>
+  `;
+
+  // Day pills
+  const pillsEl = document.getElementById('ai-day-pills');
+  pillsEl.innerHTML = plan.giorni.map((g, i) =>
+    `<div class="ai-day-pill ${i===0?'active':''}" onclick="selectAiDay(${i},this)">${g.giorno.slice(0,3)}</div>`
+  ).join('');
+  currentAiDay = 0;
+
+  // Render first day
+  renderAiDay(0);
+
+  // Lista spesa
+  renderSpesa(plan.lista_spesa);
+}
+
+function selectAiDay(idx, el) {
+  currentAiDay = idx;
+  document.querySelectorAll('.ai-day-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderAiDay(idx);
+}
+
+function renderAiDay(idx) {
+  const giorno = currentWeekPlan.giorni[idx];
+  const el = document.getElementById('ai-day-plan');
+  el.innerHTML = `
+    <div style="font-size:9px;font-weight:700;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;">
+      <span>${giorno.giorno}</span>
+      <span style="color:var(--text2);">${giorno.calorie_totali} kcal</span>
+    </div>
+    ${giorno.pasti.map(p => `
+      <div class="ai-meal-card">
+        <div class="ai-meal-header">
+          <span class="ai-meal-time">${p.orario} · ${p.nome}</span>
+          <span class="ai-meal-kcal">${p.calorie} kcal</span>
+        </div>
+        <div class="ai-meal-body">
+          <div class="ai-meal-name">${p.alimento}</div>
+          <div class="ai-meal-desc">${p.descrizione}</div>
+          <div class="ai-meal-macros">
+            <span class="ai-meal-macro amp-pro">P ${p.macros.proteine_g}g</span>
+            <span class="ai-meal-macro amp-carb">C ${p.macros.carboidrati_g}g</span>
+            <span class="ai-meal-macro amp-fat">G ${p.macros.grassi_g}g</span>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderSpesa(spesa) {
+  const el = document.getElementById('ai-spesa-list');
+  el.innerHTML = Object.entries(spesa).map(([cat, items]) => `
+    <div class="ai-spesa-category">
+      <div class="ai-spesa-cat-title">${cat}</div>
+      ${items.map((item, i) => `
+        <div class="ai-spesa-item">
+          <div class="ai-spesa-check" id="check-${cat}-${i}" onclick="toggleCheck('check-${cat}-${i}')"></div>
+          <span>${item}</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function toggleCheck(id) {
+  document.getElementById(id)?.classList.toggle('checked');
+}
+
+function toggleSpesa() {
+  spesaOpen = !spesaOpen;
+  const list = document.getElementById('ai-spesa-list');
+  const arrow = document.getElementById('spesa-arrow');
+  list.style.display = spesaOpen ? 'block' : 'none';
+  arrow.style.transform = spesaOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+// ═══════════════════════════════════
+// WORKOUT PAGE
+// ═══════════════════════════════════
+// ═══════════════════════════════════
+// MULTI-PHASE SYSTEM (infinite cycle)
+// ═══════════════════════════════════
+const PHASE_CYCLE = [
+  {
+    num:1, name:'Fase 1', sub:'Fondamenta · Tecnica e adattamento', duration:90,
+    focus:'Carichi moderati (RPE 6–7), focus tecnica, ROM completo. Non andare a cedimento.',
+    plan:{
+      push:{name:'Push Day',sub:'Petto · Spalle · Tricipiti',color:'#e8394a',grad:'rgba(232,57,74,0.3)',icon:'chest',exercises:[{name:'Panca piana multipower',sets:3,reps:'8–10',rest:'2 min',note:'Smith machine · focus tecnica'},{name:'Panca inclinata 30°',sets:3,reps:'10–12',rest:'90 sec',note:'Manubri · enfasi clavicolare'},{name:'Shoulder press manubri',sets:3,reps:'10–12',rest:'90 sec',note:'Seduto · controllo eccentrica'},{name:'Alzate laterali cavi',sets:3,reps:'12–15',rest:'60 sec',note:'Tensione costante sul deltoide'},{name:'Push-down cavo (corda)',sets:3,reps:'12–15',rest:'60 sec',note:'Isolamento tricipite'}]},
+      pull:{name:'Pull Day',sub:'Schiena · Bicipiti · Post. spalla',color:'#3b82f6',grad:'rgba(59,130,246,0.3)',icon:'back',exercises:[{name:'Pulldown lat machine',sets:4,reps:'8–10',rest:'2 min',note:'Presa larga o neutra'},{name:'Rematore macchinario',sets:3,reps:'8–10',rest:'90 sec',note:'Schiena piatta · tirata al petto'},{name:'Face pull cavo',sets:3,reps:'15',rest:'60 sec',note:'Salute cuffia dei rotatori'},{name:'Curl bilanciere EZ',sets:3,reps:'10–12',rest:'90 sec',note:'Gomiti fissi · ROM completo'},{name:'Curl martello manubri',sets:2,reps:'12',rest:'60 sec',note:'Brachiale + brachioradiale'}]},
+      legs:{name:'Leg Day',sub:'Quad · Femorali · Glutei · Polpacci',color:'#f0a742',grad:'rgba(240,167,66,0.3)',icon:'legs',exercises:[{name:'Squat multipower',sets:4,reps:'8–10',rest:'2–3 min',note:'Smith machine · depth al parallelo'},{name:'Leg press 45°',sets:3,reps:'10–12',rest:'2 min',note:'Piedi alti = femorali + glutei'},{name:'Leg curl seduto',sets:4,reps:'10–12',rest:'90 sec',note:'Eccentrica lenta 3 sec'},{name:'Leg extension',sets:3,reps:'12',rest:'60 sec',note:'Pausa 1 sec in contrazione'},{name:'Calf raise in piedi',sets:4,reps:'15–20',rest:'45 sec',note:'Pausa 1 sec in basso e in alto'}]},
+      upper:{name:'Upper Day',sub:'Upper Body · Solo se recuperato',color:'#8b5cf6',grad:'rgba(139,92,246,0.3)',icon:'upper',exercises:[{name:'Panca inclinata manubri',sets:3,reps:'10',rest:'90 sec',note:'Variante push · petto alto'},{name:'Lat machine presa stretta',sets:3,reps:'10',rest:'90 sec',note:'Spessore schiena'},{name:'Arnold press',sets:3,reps:'12',rest:'90 sec',note:'Spalle complete con rotazione'},{name:'Cable curl cavo basso',sets:3,reps:'12',rest:'60 sec',note:'Tensione costante bicipite'},{name:'French press manubri',sets:3,reps:'10–12',rest:'75 sec',note:'Tricipite da supino'}]}
+    }
+  },
+  {
+    num:2, name:'Fase 2', sub:'Ipertrofia · Volume e tempo sotto tensione', duration:90,
+    focus:'Più volume (4 serie), TUT 3-1-2, avvicinati al cedimento negli ultimi set. RPE 7–8.',
+    plan:{
+      push:{name:'Push Day',sub:'Petto · Spalle · Tricipiti',color:'#e8394a',grad:'rgba(232,57,74,0.3)',icon:'chest',exercises:[{name:'Panca piana manubri',sets:4,reps:'10–12',rest:'90 sec',note:'ROM completo · pausa 1s in basso'},{name:'Pectoral machine',sets:4,reps:'12–15',rest:'60 sec',note:'Contrazione massima · TUT lento'},{name:'Military press bilanciere',sets:4,reps:'8–10',rest:'2 min',note:'Standing · core attivo'},{name:'Alzate laterali manubri',sets:4,reps:'15–20',rest:'45 sec',note:'Drop set sull\'ultima serie'},{name:'Skull crusher EZ',sets:3,reps:'10–12',rest:'75 sec',note:'Tricipite lungo · eccentrica 3s'}]},
+      pull:{name:'Pull Day',sub:'Schiena · Bicipiti · Post. spalla',color:'#3b82f6',grad:'rgba(59,130,246,0.3)',icon:'back',exercises:[{name:'Trazioni assistite',sets:4,reps:'8–10',rest:'2 min',note:'Presa supina o neutra'},{name:'Rematore bilanciere',sets:4,reps:'8–10',rest:'2 min',note:'Busto a 45° · tirata all\'ombelico'},{name:'Pullover cavo',sets:3,reps:'12–15',rest:'60 sec',note:'Dorsali · braccia tese'},{name:'Curl concentrato manubrio',sets:3,reps:'12',rest:'60 sec',note:'Peak contraction'},{name:'Curl cavo basso',sets:3,reps:'15',rest:'45 sec',note:'Tensione costante · no swing'}]},
+      legs:{name:'Leg Day',sub:'Quad · Femorali · Glutei · Polpacci',color:'#f0a742',grad:'rgba(240,167,66,0.3)',icon:'legs',exercises:[{name:'Leg press 45°',sets:5,reps:'12–15',rest:'2 min',note:'Ampiezza massima · piedi medi'},{name:'Affondi con manubri',sets:3,reps:'12 per lato',rest:'90 sec',note:'Passo lungo · ginocchio non oltre la punta'},{name:'Leg curl sdraiato',sets:4,reps:'12–15',rest:'75 sec',note:'Pausa in contrazione 2 sec'},{name:'Leg extension',sets:4,reps:'15',rest:'60 sec',note:'Drop set sull\'ultima'},{name:'Calf raise seduto',sets:5,reps:'20',rest:'45 sec',note:'Pausa 2s in allungamento'}]},
+      upper:{name:'Upper Day',sub:'Spinta + Tirata superset',color:'#8b5cf6',grad:'rgba(139,92,246,0.3)',icon:'upper',exercises:[{name:'Superset: Push-up + Rematore TRX',sets:4,reps:'12+12',rest:'90 sec',note:'No riposo tra i due esercizi'},{name:'Shoulder press + Face pull',sets:3,reps:'10+15',rest:'90 sec',note:'Superset antagonisti'},{name:'Dips alle parallele',sets:3,reps:'10–12',rest:'2 min',note:'Peso corporeo o lastrato'},{name:'Curl hammer + Tricep overhead',sets:3,reps:'12+12',rest:'75 sec',note:'Superset braccio completo'}]}
+    }
+  },
+  {
+    num:3, name:'Fase 3', sub:'Forza · Carichi pesanti e compound', duration:90,
+    focus:'Carichi alti (RPE 8–9), meno rip, più recupero. Compound movements prioritari.',
+    plan:{
+      push:{name:'Push Day',sub:'Petto · Spalle · Tricipiti',color:'#e8394a',grad:'rgba(232,57,74,0.3)',icon:'chest',exercises:[{name:'Panca piana bilanciere',sets:5,reps:'4–6',rest:'3 min',note:'Smith o libera · carico massimale'},{name:'Overhead press bilanciere',sets:4,reps:'5–7',rest:'2–3 min',note:'Standing · carico pesante'},{name:'Panca inclinata bilanciere',sets:3,reps:'6–8',rest:'2 min',note:'30° · tensione sul petto alto'},{name:'Dips lastrati',sets:3,reps:'6–8',rest:'2 min',note:'Peso aggiunto · full ROM'},{name:'Estensioni tricipite cavo',sets:3,reps:'10',rest:'75 sec',note:'Finitura isolamento'}]},
+      pull:{name:'Pull Day',sub:'Schiena · Bicipiti · Post. spalla',color:'#3b82f6',grad:'rgba(59,130,246,0.3)',icon:'back',exercises:[{name:'Stacco da terra',sets:4,reps:'4–5',rest:'3–4 min',note:'Setup perfetto · cintura se >90% 1RM'},{name:'Trazioni lastrate',sets:4,reps:'5–7',rest:'2–3 min',note:'Presa prona · peso aggiunto'},{name:'Rematore bilanciere pesante',sets:4,reps:'6–8',rest:'2 min',note:'Stile Yates o classico'},{name:'Curl bilanciere pesante',sets:4,reps:'6–8',rest:'90 sec',note:'No swing · carico massimale tollerato'},{name:'Facepull cavo',sets:3,reps:'12',rest:'60 sec',note:'Salute spalle · mai saltare'}]},
+      legs:{name:'Leg Day',sub:'Quad · Femorali · Glutei · Polpacci',color:'#f0a742',grad:'rgba(240,167,66,0.3)',icon:'legs',exercises:[{name:'Squat libero',sets:5,reps:'4–6',rest:'3–4 min',note:'Carico pesante · depth al parallelo'},{name:'Stacco rumeno',sets:4,reps:'6–8',rest:'2–3 min',note:'Femorali · busto quasi orizzontale'},{name:'Leg press pesante',sets:3,reps:'8–10',rest:'2 min',note:'Piedi medi · carico massimale'},{name:'Leg curl seduto',sets:3,reps:'8–10',rest:'90 sec',note:'Carico pesante · eccentrica lenta'},{name:'Calf raise in piedi con sovraccarico',sets:4,reps:'10–12',rest:'60 sec',note:'Carico alto · ROM completo'}]},
+      upper:{name:'Upper Day',sub:'Forza upper body completa',color:'#8b5cf6',grad:'rgba(139,92,246,0.3)',icon:'upper',exercises:[{name:'Panca inclinata pesante',sets:4,reps:'5–7',rest:'3 min',note:'Compound prioritario'},{name:'Trazioni lastrate',sets:4,reps:'5–7',rest:'3 min',note:'Antagonista spinta'},{name:'Overhead press',sets:3,reps:'6–8',rest:'2 min',note:'Standing o seduto'},{name:'Curl bilanciere + French press',sets:3,reps:'8+8',rest:'90 sec',note:'Superset braccio'}]}
+    }
+  },
+  {
+    num:4, name:'Fase 4', sub:'Specializzazione · Intensità e tecniche avanzate', duration:90,
+    focus:'Drop set, rest-pause, myorep. Intensità massima. RPE 9–10 sull\'ultima serie.',
+    plan:{
+      push:{name:'Push Day',sub:'Petto · Spalle · Tricipiti',color:'#e8394a',grad:'rgba(232,57,74,0.3)',icon:'chest',exercises:[{name:'Panca piana + Drop set finale',sets:4,reps:'8 → drop a cedimento',rest:'2 min',note:'Ultima serie: drop 20% subito'},{name:'Crossover cavi alti',sets:4,reps:'12–15',rest:'60 sec',note:'Peak contraction · strizza il petto'},{name:'Alzate laterali myorep',sets:3,reps:'10+5+5+5',rest:'15 sec tra cluster',note:'Tecnica myorep · deltoide laterale'},{name:'Overhead press rest-pause',sets:3,reps:'6 + riposo 15s + 3',rest:'2 min',note:'Rest-pause per intensità'},{name:'Dips + Push-up fino a cedimento',sets:3,reps:'cedimento',rest:'90 sec',note:'Superset finale tricipite'}]},
+      pull:{name:'Pull Day',sub:'Schiena · Bicipiti · Post. spalla',color:'#3b82f6',grad:'rgba(59,130,246,0.3)',icon:'back',exercises:[{name:'Lat machine drop set',sets:4,reps:'8 → drop a cedimento',rest:'2 min',note:'Drop 25% · non staccare le mani'},{name:'Rematore con pausa',sets:4,reps:'8',rest:'2 min',note:'2 sec di pausa in contrazione'},{name:'Straight arm pulldown',sets:3,reps:'15',rest:'60 sec',note:'Dorsali · braccia tese'},{name:'Curl inclinato manubri',sets:3,reps:'10',rest:'75 sec',note:'Allungamento massimo del bicipite'},{name:'Curl myorep',sets:2,reps:'10+5+5',rest:'15 sec tra cluster',note:'Tecnica myorep'}]},
+      legs:{name:'Leg Day',sub:'Quad · Femorali · Glutei · Polpacci',color:'#f0a742',grad:'rgba(240,167,66,0.3)',icon:'legs',exercises:[{name:'Leg press 20 rip',sets:4,reps:'20',rest:'2 min',note:'Volume altissimo · no lockout'},{name:'Squat goblet + Drop',sets:3,reps:'12 → drop',rest:'90 sec',note:'Manubrio · drop set immediato'},{name:'Leg curl rest-pause',sets:3,reps:'8+3+3',rest:'15 sec tra cluster',note:'Intensità massima femorali'},{name:'Sissy squat',sets:3,reps:'15–20',rest:'60 sec',note:'Isolamento quad · difficile ma efficace'},{name:'Calf raise 100 rip totali',sets:1,reps:'100 (pause quando serve)',rest:'–',note:'Challenge: 100 rip totali'}]},
+      upper:{name:'Upper Day',sub:'Intensità massima upper',color:'#8b5cf6',grad:'rgba(139,92,246,0.3)',icon:'upper',exercises:[{name:'Giant set petto-schiena-spalle',sets:3,reps:'10+10+10',rest:'2 min tra giant',note:'3 esercizi no-stop'},{name:'21s curl bilanciere',sets:3,reps:'7+7+7',rest:'90 sec',note:'Tecnica 21: basso·alto·completo'},{name:'Tricep overhead drop set',sets:3,reps:'10 → drop',rest:'90 sec',note:'Drop 20% · cedimento'}]}
+    }
+  }
+];
+
+// Gets the current phase index cycling infinitely
+function getCurrentPhaseIndex(){
+  const startMs = parseInt(localStorage.getItem('fitos_start_date')||Date.now());
+  const elapsed = Date.now() - startMs;
+  const totalDays = Math.floor(elapsed / 86400000);
+  let daysCounted = 0;
+  let cycleIdx = 0;
+  while(true){
+    const phase = PHASE_CYCLE[cycleIdx % PHASE_CYCLE.length];
+    if(daysCounted + phase.duration > totalDays) break;
+    daysCounted += phase.duration;
+    cycleIdx++;
+  }
+  return cycleIdx % PHASE_CYCLE.length;
+}
+
+function getCurrentPhase(){
+  return PHASE_CYCLE[getCurrentPhaseIndex()];
+}
+
+function getDayInPhase(){
+  const startMs = parseInt(localStorage.getItem('fitos_start_date')||Date.now());
+  const elapsed = Date.now() - startMs;
+  const totalDays = Math.floor(elapsed / 86400000);
+  let daysCounted = 0;
+  let cycleIdx = 0;
+  while(true){
+    const phase = PHASE_CYCLE[cycleIdx % PHASE_CYCLE.length];
+    if(daysCounted + phase.duration > totalDays) return totalDays - daysCounted;
+    daysCounted += phase.duration;
+    cycleIdx++;
+  }
+}
+
+// Check if a phase transition just happened (within last 2 days)
+function checkPhaseTransition(){
+  const startMs = parseInt(localStorage.getItem('fitos_start_date')||Date.now());
+  if(!localStorage.getItem('fitos_start_date')){
+    localStorage.setItem('fitos_start_date', Date.now().toString());
+  }
+  const lastDismissed = parseInt(localStorage.getItem('fitos_phase_dismissed')||'0');
+  const currentPhaseIdx = getCurrentPhaseIndex();
+  const lastActivated = parseInt(localStorage.getItem('fitos_phase_activated')||'0');
+
+  if(currentPhaseIdx === lastActivated) return; // already on this phase
+  if(currentPhaseIdx === lastDismissed) return; // user dismissed this one
+
+  // Show modal for new phase
+  const newPhase = PHASE_CYCLE[currentPhaseIdx];
+  showPhaseModal(newPhase, currentPhaseIdx);
+}
+
+let pendingPhaseIdx = 0;
+
+function showPhaseModal(phase, idx){
+  pendingPhaseIdx = idx;
+  document.getElementById('modal-phase-title').textContent = phase.name;
+  document.getElementById('modal-phase-sub').textContent = phase.sub;
+
+  const types = ['push','pull','legs','upper'];
+  const labels = {push:'Push Day',pull:'Pull Day',legs:'Leg Day',upper:'Upper Day'};
+
+  document.getElementById('modal-phase-content').innerHTML = `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:9px;font-weight:700;color:var(--red2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Focus</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;">${phase.focus}</div>
+    </div>
+    ${types.map(t => {
+      const day = phase.plan[t];
+      return `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:9px;font-weight:800;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">${labels[t]}</div>
+        ${day.exercises.map(ex=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text);">${ex.name}</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:1px;">${ex.note}</div>
+            </div>
+            <div style="font-size:10px;font-weight:700;color:var(--text2);flex-shrink:0;margin-left:10px;">${ex.sets}×${ex.reps}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    }).join('')}
+  `;
+
+  document.getElementById('phase-modal').style.display = 'block';
+}
+
+function dismissPhaseModal(){
+  localStorage.setItem('fitos_phase_dismissed', pendingPhaseIdx.toString());
+  document.getElementById('phase-modal').style.display = 'none';
+}
+
+function activatePhase(){
+  const phase = PHASE_CYCLE[pendingPhaseIdx];
+  // Update customPlan with new phase exercises
+  Object.keys(phase.plan).forEach(type => {
+    customPlan[type] = phase.plan[type].exercises.map(e => e.name);
+  });
+  localStorage.setItem('fitos_plan', JSON.stringify(customPlan));
+  localStorage.setItem('fitos_phase_activated', pendingPhaseIdx.toString());
+  localStorage.setItem('fitos_phase_dismissed', pendingPhaseIdx.toString());
+  document.getElementById('phase-modal').style.display = 'none';
+  renderLogList();
+  renderCustomList();
+  initWorkoutPage();
+  renderPhaseAndRing();
+
+  // Schedule next notification
+  const phase_data = PHASE_CYCLE[pendingPhaseIdx];
+  if('Notification' in window && Notification.permission === 'granted'){
+    // Can't schedule future notifs from browser — remind on next open
+  }
+}
+
+const WORKOUT_DATA = {
+  push: ()=>{ const p=getCurrentPhase(); return p.plan.push; },
+  pull: ()=>{ const p=getCurrentPhase(); return p.plan.pull; },
+  legs: ()=>{ const p=getCurrentPhase(); return p.plan.legs; },
+  upper:()=>{ const p=getCurrentPhase(); return p.plan.upper; }
+};
+
+function getWorkoutDay(type){ return WORKOUT_DATA[type] ? WORKOUT_DATA[type]() : null; }
+const DOW = ['dom','lun','mar','mer','gio','ven','sab'];
+function getTodayType(){return calendar[DOW[new Date().getDay()]]||null;}
+
+const QUOTES = [
+  {text:"Il dolore che senti oggi sarà la forza che sentirai domani.", author:"Arnold Schwarzenegger"},
+  {text:"Non smettere quando sei stanco. Smetti quando hai finito.", author:"Anonymous"},
+  {text:"Il tuo corpo può farcela. È la tua mente che devi convincere.", author:"Anonymous"},
+  {text:"I campioni non si costruiscono in palestra. Si costruiscono dall'interno, dal desiderio, dai sogni e dalla visione.", author:"Muhammad Ali"},
+  {text:"Ogni rep ti avvicina alla persona che vuoi diventare.", author:"Anonymous"},
+  {text:"La forza non viene da ciò che puoi fare. Viene dal superare le cose che pensavi di non poter fare.", author:"Rikki Rogers"},
+  {text:"Prima di mollare, ricordati perché hai iniziato.", author:"Anonymous"},
+  {text:"Il successo appartiene a chi si alza anche quando non ne ha voglia.", author:"Anonymous"},
+  {text:"Non trovare scuse. Trova un modo.", author:"Anonymous"},
+  {text:"Ogni grande impresa comincia con la decisione di provarci.", author:"Anonymous"},
+  {text:"La costanza batte il talento quando il talento non si allena con costanza.", author:"Anonymous"},
+  {text:"Il tuo unico limite sei tu.", author:"Anonymous"},
+  {text:"Non aspettare l'ispirazione. Comincia, e poi arriverà.", author:"Jack London"},
+  {text:"Sii la persona che i tuoi muscoli meritano.", author:"Anonymous"},
+  {text:"Oggi è il giorno. Non domani. Non la prossima settimana. Oggi.", author:"Anonymous"},
+];
+
+function renderPhaseAndRing(){
+  // ── FASE ──
+  const phase = getCurrentPhase();
+  const dayInPhase = getDayInPhase();
+  const pct = Math.min(100, (dayInPhase / phase.duration) * 100);
+  const weekInPhase = Math.ceil((dayInPhase+1) / 7);
+  const weeksTotal = Math.ceil(phase.duration / 7);
+
+  document.getElementById('wo-phase-name').textContent = phase.name + ' · ' + phase.sub.split('·')[0].trim();
+  document.getElementById('wo-phase-weeks').textContent = `Giorno ${dayInPhase+1} di ${phase.duration}`;
+  document.getElementById('wo-phase-bar').style.width = pct + '%';
+  document.getElementById('wo-phase-progress-text').textContent = `Settimana ${weekInPhase} di ${weeksTotal}`;
+
+  // ── ANELLO SETTIMANALE ──
+  const sessions = JSON.parse(localStorage.getItem('fitos_sessions')||'[]');
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - (now.getDay()===0?6:now.getDay()-1));
+  startOfWeek.setHours(0,0,0,0);
+  const thisWeekSessions = sessions.filter(s=>{
+    const parts = s.date.split('/');
+    if(parts.length<3) return false;
+    const d = new Date(parts[2],parts[1]-1,parts[0]);
+    return d >= startOfWeek;
+  });
+  const done = thisWeekSessions.length;
+  const target = Object.values(calendar).filter(v=>v&&v!=='riposo').length || 3;
+  const ratio = Math.min(1, done / target);
+  const circumference = 201;
+  document.getElementById('wo-ring-arc').style.strokeDashoffset = circumference-(circumference*ratio);
+  document.getElementById('wo-ring-arc').style.stroke = done >= target ? 'var(--green)' : 'var(--red)';
+  document.getElementById('wo-ring-text').textContent = `${done}/${target}`;
+  document.getElementById('wo-ring-label').textContent = done>=target ? '✓ obiettivo raggiunto' : 'giorni completati';
+}
+
+function renderQuote(){
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+  const q = QUOTES[dayOfYear % QUOTES.length];
+  document.getElementById('wo-quote-text').textContent = q.text;
+  document.getElementById('wo-quote-author').textContent = '— ' + q.author;
+}
+
+function getWorkoutSVG(icon, color) {
+  const svgs = {
+
+    // PUSH — bilanciere con pesi
+    chest:`<svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+      <rect x="28" y="56" width="104" height="8" rx="4" fill="${color}" opacity="0.55"/>
+      <rect x="14" y="38" width="14" height="44" rx="5" fill="${color}"/>
+      <rect x="28" y="44" width="8" height="32" rx="4" fill="${color}" opacity="0.8"/>
+      <rect x="132" y="38" width="14" height="44" rx="5" fill="${color}"/>
+      <rect x="124" y="44" width="8" height="32" rx="4" fill="${color}" opacity="0.8"/>
+      <rect x="36" y="52" width="6" height="16" rx="3" fill="${color}" opacity="0.9"/>
+      <rect x="118" y="52" width="6" height="16" rx="3" fill="${color}" opacity="0.9"/>
+    </svg>`,
+
+    // PULL — sbarra per trazioni
+    back:`<svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+      <!-- Supporti verticali -->
+      <rect x="24" y="20" width="8" height="80" rx="4" fill="${color}" opacity="0.6"/>
+      <rect x="128" y="20" width="8" height="80" rx="4" fill="${color}" opacity="0.6"/>
+      <!-- Piedi supporti -->
+      <rect x="10" y="96" width="36" height="8" rx="4" fill="${color}" opacity="0.5"/>
+      <rect x="114" y="96" width="36" height="8" rx="4" fill="${color}" opacity="0.5"/>
+      <!-- Sbarra orizzontale -->
+      <rect x="20" y="20" width="120" height="10" rx="5" fill="${color}"/>
+      <!-- Rinforzi diagonali -->
+      <line x1="32" y1="30" x2="32" y2="96" stroke="${color}" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+      <line x1="128" y1="30" x2="128" y2="96" stroke="${color}" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+    </svg>`,
+
+    // LEGS — rack per squat
+    legs:`<svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+      <!-- Montanti verticali sx -->
+      <rect x="18" y="14" width="10" height="96" rx="4" fill="${color}" opacity="0.7"/>
+      <!-- Montanti verticali dx -->
+      <rect x="132" y="14" width="10" height="96" rx="4" fill="${color}" opacity="0.7"/>
+      <!-- Barra porta bilanciere sx (J-hook) -->
+      <rect x="18" y="46" width="18" height="8" rx="3" fill="${color}"/>
+      <!-- Barra porta bilanciere dx -->
+      <rect x="124" y="46" width="18" height="8" rx="3" fill="${color}"/>
+      <!-- Bilanciere sul rack -->
+      <rect x="30" y="42" width="100" height="8" rx="4" fill="${color}" opacity="0.55"/>
+      <!-- Piatti sx -->
+      <rect x="30" y="28" width="10" height="36" rx="4" fill="${color}"/>
+      <rect x="40" y="33" width="6" height="26" rx="3" fill="${color}" opacity="0.8"/>
+      <!-- Piatti dx -->
+      <rect x="120" y="28" width="10" height="36" rx="4" fill="${color}"/>
+      <rect x="114" y="33" width="6" height="26" rx="3" fill="${color}" opacity="0.8"/>
+      <!-- Barra sicurezza sx -->
+      <rect x="18" y="72" width="22" height="5" rx="2.5" fill="${color}" opacity="0.5"/>
+      <!-- Barra sicurezza dx -->
+      <rect x="120" y="72" width="22" height="5" rx="2.5" fill="${color}" opacity="0.5"/>
+      <!-- Base piedi -->
+      <rect x="8" y="106" width="40" height="7" rx="3.5" fill="${color}" opacity="0.55"/>
+      <rect x="112" y="106" width="40" height="7" rx="3.5" fill="${color}" opacity="0.55"/>
+    </svg>`,
+
+    upper:`<svg width="140" height="150" viewBox="0 0 140 150" fill="none">
+      <circle cx="70" cy="24" r="14" fill="${color}" opacity="0.9"/>
+      <path d="M48 46 Q70 40 92 46 L88 96 Q70 104 52 96 Z" fill="${color}" opacity="0.75"/>
+      <path d="M48 52 L18 36" stroke="${color}" stroke-width="12" stroke-linecap="round"/>
+      <path d="M18 36 L8 20" stroke="${color}" stroke-width="9" stroke-linecap="round"/>
+      <path d="M92 52 L122 36" stroke="${color}" stroke-width="12" stroke-linecap="round"/>
+      <path d="M122 36 L132 20" stroke="${color}" stroke-width="9" stroke-linecap="round"/>
+      <path d="M57 96 L50 130" stroke="${color}" stroke-width="11" stroke-linecap="round"/>
+      <path d="M83 96 L90 130" stroke="${color}" stroke-width="11" stroke-linecap="round"/>
+      <rect x="0" y="14" width="16" height="8" rx="4" fill="${color}" opacity="0.9"/>
+      <rect x="124" y="14" width="16" height="8" rx="4" fill="${color}" opacity="0.9"/>
+    </svg>`
+  };
+  return svgs[icon] || svgs.chest;
+}
+
+function initWorkoutPage(){
+  const today=new Date();
+  const dayNames=['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+  const type=getTodayType();
+  const data=type?getWorkoutDay(type):null;
+  document.getElementById('wo-today-tag').textContent=`Oggi · ${dayNames[today.getDay()]}`;
+  if(data){
+    document.getElementById('wo-today-type').textContent=data.name;
+    document.getElementById('wo-today-sub').textContent=data.sub;
+    document.getElementById('wo-hero-card').style.background=`radial-gradient(ellipse at 30% 40%, ${data.grad}, rgba(8,8,8,0.95))`;
+    document.getElementById('wo-hero-visual').innerHTML=getWorkoutSVG(data.icon,data.color);
+    document.getElementById('wo-start-btn').style.opacity='1';
+    document.getElementById('wo-start-btn').style.pointerEvents='auto';
+    document.getElementById('wo-start-btn').style.background=data.color;
+    document.getElementById('wo-start-btn').style.boxShadow=`0 8px 24px ${data.color}55`;
+  } else {
+    document.getElementById('wo-today-type').textContent='Riposo';
+    document.getElementById('wo-today-sub').textContent='Nessun allenamento programmato oggi';
+    document.getElementById('wo-hero-card').style.background='rgba(255,255,255,0.03)';
+    document.getElementById('wo-hero-visual').innerHTML='';
+    document.getElementById('wo-start-btn').style.opacity='0.4';
+    document.getElementById('wo-start-btn').style.pointerEvents='none';
+  }
+  const strip=document.getElementById('wo-week-strip');
+  const labels=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  const keys=['lun','mar','mer','gio','ven','sab','dom'];
+  const todayIdx=today.getDay()===0?6:today.getDay()-1;
+  strip.innerHTML=keys.map((k,i)=>{
+    const wt=calendar[k]; const wd=wt?getWorkoutDay(wt):null; const isToday=i===todayIdx;
+    return`<div class="wo-day-chip ${isToday?'today':''} ${!wt?'rest':''}" onclick="selectWorkoutDay('${k}',${i})" id="wchip-${k}"><div class="wo-day-name">${labels[i]}</div><div class="wo-day-dot"></div><div class="wo-day-type">${wd?wd.name.split(' ')[0]:'–'}</div></div>`;
+  }).join('');
+}
+
+function selectWorkoutDay(key, idx){
+  // Update chip active state
+  document.querySelectorAll('.wo-day-chip').forEach(c=>c.classList.remove('today'));
+  document.getElementById('wchip-'+key)?.classList.add('today');
+
+  const type=calendar[key];
+  const data=type?getWorkoutDay(type):null;
+  const labels=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+
+  document.getElementById('wo-today-tag').textContent=`${labels[idx]} ${isTodayIdx(idx)?'· Oggi':''}`;
+
+  if(data){
+    document.getElementById('wo-today-type').textContent=data.name;
+    document.getElementById('wo-today-sub').textContent=data.sub;
+    document.getElementById('wo-hero-card').style.background=`radial-gradient(ellipse at 30% 40%, ${data.grad}, rgba(8,8,8,0.95))`;
+    document.getElementById('wo-hero-visual').innerHTML=getWorkoutSVG(data.icon,data.color);
+    document.getElementById('wo-start-btn').style.opacity='1';
+    document.getElementById('wo-start-btn').style.pointerEvents='auto';
+    document.getElementById('wo-start-btn').style.background=data.color;
+    document.getElementById('wo-start-btn').style.boxShadow=`0 8px 24px ${data.color}55`;
+    document.getElementById('wo-start-btn').onclick=()=>startWorkoutType(type);
+  } else {
+    document.getElementById('wo-today-type').textContent='Riposo';
+    document.getElementById('wo-today-sub').textContent='Nessun allenamento programmato';
+    document.getElementById('wo-hero-card').style.background='rgba(255,255,255,0.03)';
+    document.getElementById('wo-hero-visual').innerHTML='';
+    document.getElementById('wo-start-btn').style.opacity='0.4';
+    document.getElementById('wo-start-btn').style.pointerEvents='none';
+  }
+}
+
+function isTodayIdx(idx){
+  const today=new Date().getDay();
+  const todayIdx=today===0?6:today-1;
+  return idx===todayIdx;
+}
+
+function startWorkoutType(type){
+  if(!type) return;
+  const data=getWorkoutDay(type);
+  document.getElementById('wo-hero').style.display='none';
+  document.getElementById('wo-week-strip').style.display='none';
+  document.getElementById('wo-active').style.display='block';
+  document.getElementById('wo-active-title').textContent=data.name;
+  document.getElementById('wo-active-sub').textContent=data.sub;
+  renderChecklist(data);
+}
+
+function startWorkout(){ startWorkoutType(getTodayType()); }
+
+function endWorkout(){
+  stopTimer();
+  document.getElementById('wo-hero').style.display='block';
+  document.getElementById('wo-week-strip').style.display='flex';
+  document.getElementById('wo-active').style.display='none';
+}
+
+function renderChecklist(data){
+  document.getElementById('wo-ex-checklist').innerHTML=data.exercises.map((ex,ei)=>`
+    <div class="wo-ex-card">
+      <div class="wo-ex-card-header">
+        <div class="wo-ex-card-name">${ex.name}</div>
+        <div class="wo-ex-card-info">${ex.sets} serie × ${ex.reps} · Rec. ${ex.rest} · ${ex.note}</div>
+      </div>
+      <div class="wo-series-list">
+        ${Array.from({length:ex.sets},(_,si)=>`
+          <div class="wo-serie-row">
+            <div class="wo-serie-num">S${si+1}</div>
+            <div class="wo-serie-label">${ex.reps} rip.</div>
+            <div class="wo-serie-check" id="chk-${ei}-${si}" onclick="toggleSerie('chk-${ei}-${si}')"></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSerie(id){document.getElementById(id)?.classList.toggle('done');}
+
+// TIMER
+let timerInterval=null,timerSeconds=0,timerTotal=0;
+function startTimer(secs){
+  stopTimer(); timerSeconds=secs; timerTotal=secs; updateTimerDisplay();
+  timerInterval=setInterval(()=>{
+    timerSeconds--;updateTimerDisplay();
+    document.getElementById('wo-timer-bar').style.width=(timerSeconds/timerTotal*100)+'%';
+    if(timerSeconds<=0){stopTimer();document.getElementById('wo-timer-bar').style.width='0%';if(Notification.permission==='granted')new Notification('ORBT',{body:'⏱ Recupero completato!'});}
+  },1000);
+}
+function stopTimer(){clearInterval(timerInterval);timerInterval=null;timerSeconds=0;updateTimerDisplay();document.getElementById('wo-timer-bar').style.width='100%';}
+function updateTimerDisplay(){const m=String(Math.floor(timerSeconds/60)).padStart(2,'0');const s=String(timerSeconds%60).padStart(2,'0');document.getElementById('wo-timer-display').textContent=`${m}:${s}`;}
+
+// CANVAS PULSE ANIMATION
+function initCanvas(){
+  const canvas=document.getElementById('workout-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    t+=0.008;
+    for(let x=0;x<canvas.width;x+=2){
+      for(let band=0;band<4;band++){
+        const y1=canvas.height*(0.15+band*0.22)+Math.sin(x*0.018+t+band*1.3)*45+Math.sin(x*0.035-t*0.6+band*0.9)*20;
+        const h=28+Math.sin(x*0.012+t*0.7+band)*12;
+        const alpha=0.055+Math.sin(x*0.009+t+band*0.8)*0.03;
+        const r=232, g=Math.floor(40+band*18), b=Math.floor(60+band*22);
+        const grad=ctx.createLinearGradient(x,y1,x,y1+h);
+        grad.addColorStop(0,`rgba(${r},${g},${b},0)`);
+        grad.addColorStop(0.4,`rgba(${r},${g},${b},${alpha})`);
+        grad.addColorStop(0.6,`rgba(${r},${g},${b},${alpha})`);
+        grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+        ctx.fillStyle=grad;
+        ctx.fillRect(x,y1,2,h);
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
 }
 
 // ═══════════════════════════════════
@@ -1013,9 +2317,21 @@ if('serviceWorker' in navigator){
 renderLogList();
 renderHistory();
 renderCustomList();
-renderActiveDays();
+renderAssignStrip();
+renderCalendar();
 updateWaterUI();
 renderWaterChart();
+initWorkoutPage();
+renderQuote();
+renderPhaseAndRing();
+initCanvas();
+initWaterCanvas();
+// Init start date if not set
+if(!localStorage.getItem('fitos_start_date')){
+  localStorage.setItem('fitos_start_date', Date.now().toString());
+}
+// Check if phase changed
+setTimeout(checkPhaseTransition, 800);
 </script>
 </body>
 </html>

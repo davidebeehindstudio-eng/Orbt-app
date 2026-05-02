@@ -1,6 +1,6 @@
 {
-  "name": "FitOS — Piano Personalizzato",
-  "short_name": "FitOS",
+  "name": "ORBT — Il tuo piano di allenamento",
+  "short_name": "ORBT",
   "description": "Il tuo piano di allenamento e nutrizione personalizzato",
   "start_url": "/index.html",
   "display": "standalone",
