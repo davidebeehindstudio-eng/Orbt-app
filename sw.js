@@ -1,5 +1,11 @@
-const CACHE = 'orbt-v3';
-const ASSETS = ['./', './index.html', './manifest.json', './sw.js', './icon-192.svg', './icon-512.svg'];
+const CACHE = 'orbt-v4';
+const ASSETS = [
+  '/Orbt-app/',
+  '/Orbt-app/index.html',
+  '/Orbt-app/manifest.json',
+  '/Orbt-app/icon-192.svg',
+  '/Orbt-app/icon-512.svg'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -15,6 +21,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => caches.match('/Orbt-app/index.html')))
   );
 });
