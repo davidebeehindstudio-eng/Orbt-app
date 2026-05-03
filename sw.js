@@ -1,4 +1,4 @@
-const CACHE = 'fitos-v1';
+const CACHE = 'orbt-v2';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
