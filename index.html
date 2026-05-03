@@ -347,7 +347,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .wc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
 .wc-val{font-size:10px;font-weight:700;color:#60a5fa;min-height:11px;text-align:center;}
 .wc-track{width:100%;background:var(--surface);border-radius:4px 4px 2px 2px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;position:relative;}
-.wc-fill{width:100%;background:linear-gradient(180deg,#60a5fa,#1d4ed8);border-radius:4px 4px 0 0;height:0;transition:height 1s cubic-bezier(0.4,0,0.2,1);will-change:height;}
+.wc-fill{width:100%;background:linear-gradient(180deg,#60a5fa,#1d4ed8);border-radius:4px 4px 0 0;height:0;transition:height 1.8s cubic-bezier(0.4,0,0.2,1);will-change:height;}
 .wc-lbl{font-size:7px;font-weight:700;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;}
 
 /* Reminder */
@@ -1241,8 +1241,8 @@ let waterCanvasY = 180;
 let waterTargetY = 180;
 let waterVelocity = 0;
 let waterAnimId = null;
-const WATER_SPRING = 0.08;   // spring stiffness
-const WATER_DAMPING = 0.72;  // damping (lower = more oscillation)
+const WATER_SPRING = 0.02;  // spring stiffness
+const WATER_DAMPING = 0.85;  // damping (lower = more oscillation)
 
 function initWaterCanvas() {
   const canvas = document.getElementById('water-canvas');
