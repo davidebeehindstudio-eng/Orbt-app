@@ -900,7 +900,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="water-drop-wrap">
       <div style="position:relative;width:140px;height:168px;">
         <!-- Canvas for organic water animation (below) -->
-        <canvas id="water-canvas" width="150" height="180" style="position:absolute;top:0;left:0;width:140px;height:168px;z-index:1;"></canvas>
+        <canvas id="water-canvas" width="300" height="360" style="position:absolute;top:0;left:0;width:140px;height:168px;z-index:1;"></canvas>
         <!-- Drop outline + text SVG (above) -->
         <svg width="140" height="168" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;z-index:2;">
           <text id="drop-ml-text" x="75" y="122" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="22" fill="white" style="filter:drop-shadow(0 1px 4px rgba(0,0,0,0.8));">0</text>
@@ -1248,7 +1248,15 @@ function initWaterCanvas() {
   const canvas = document.getElementById('water-canvas');
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
+
+  // Retina/HiDPI support
+  const dpr = window.devicePixelRatio || 2;
   const W = 150, H = 180;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = '140px';
+  canvas.style.height = '168px';
+  ctx.scale(dpr, dpr);
 
   // Drop clipping path
   function dropPath(ctx) {
@@ -1316,16 +1324,16 @@ function initWaterCanvas() {
       // Drop outline — drawn AFTER clip restore so it's always on top
       ctx.save();
       dropPath(ctx);
-      ctx.strokeStyle = 'rgba(96,165,250,0.7)';
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = 'rgba(96,165,250,0.9)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
       ctx.restore();
     } else {
       // Empty drop — show outline only
       ctx.save();
       dropPath(ctx);
-      ctx.strokeStyle = 'rgba(96,165,250,0.35)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(96,165,250,0.5)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
       ctx.restore();
     }
