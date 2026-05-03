@@ -381,7 +381,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .cal-week{display:flex;gap:5px;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;padding-bottom:8px;margin-bottom:4px;padding-left:2px;padding-right:2px;scroll-snap-type:x proximity;}
 .cal-week::-webkit-scrollbar{display:none;}
 .cal-week::-webkit-scrollbar{display:none;}
-.cal-band{flex:0 0 140px;min-width:140px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);background:#1e1e20;transition:border-color 0.2s;cursor:grab;user-select:none;scroll-snap-align:start;}
+.cal-band{flex:0 0 140px;min-width:140px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);background:#1e1e20;transition:border-color 0.2s;user-select:none;scroll-snap-align:start;}
 .cal-band.has-workout{border-color:rgba(255,255,255,0.13);background:#26262a;}
 .cal-band.drag-over{border-color:var(--red);background:rgba(232,57,74,0.15);}
 .cal-band-header{padding:10px 6px 8px;text-align:center;border-bottom:1px solid var(--border);}
@@ -396,7 +396,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .cal-band.has-workout .cal-band-drag-handle{border-top-color:rgba(232,57,74,0.15);}
 
 /* 3D drag effect */
-.cal-band{transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.2s;}
+
 .cal-band.dragging{
   opacity:0.35;
   transform:scale(0.96);
@@ -1504,9 +1504,7 @@ function renderCalendar() {
         ondragend="calDragEnd(event)"
         ondragstart="calDragStart(event,'${key}')"
         draggable="${workout?'true':'false'}"
-        ontouchstart="calTouchStart(event,'${key}')"
-        ontouchmove="calTouchMove(event)"
-        ontouchend="calTouchEnd(event,'${key}')">
+>
         <div class="cal-band-header">
           <div class="cal-band-name">${DAYS_IT[i]}</div>
         </div>
@@ -1562,130 +1560,6 @@ function swapCalDays(a, b) {
 }
 
 // ── TOUCH DRAG WITH 3D CLONE ──
-let touchDragDay = null;
-let touchClone = null;
-let touchStartX = 0;
-let touchStartY = 0;
-let touchLongPressTimer = null;
-let touchDragging = false;
-let touchInitialLeft = 0;
-let touchInitialTop = 0;
-
-function calTouchStart(e, day) {
-  if(!calendar[day]) return;
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-  touchDragging = false;
-
-  touchLongPressTimer = setTimeout(() => {
-    touchDragDay = day;
-    touchDragging = true;
-
-    const band = document.getElementById('calband-'+day);
-    const rect = band.getBoundingClientRect();
-    touchInitialLeft = rect.left;
-    touchInitialTop = rect.top;
-
-    // Clone only the visual appearance, not interactive content
-    touchClone = document.createElement('div');
-    touchClone.style.cssText = `
-      position:fixed;pointer-events:none;z-index:9999;
-      width:${rect.width}px;height:${rect.height}px;
-      left:${rect.left}px;top:${rect.top}px;
-      border-radius:14px;
-      background:#2a2a2e;
-      border:1.5px solid rgba(255,255,255,0.3);
-      box-shadow:0 20px 40px rgba(0,0,0,0.6);
-      overflow:hidden;
-      transform:scale(1.05);
-      transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
-      will-change:left,top;
-    `;
-    // Copy inner HTML for visual only
-    touchClone.innerHTML = band.innerHTML;
-    document.body.appendChild(touchClone);
-
-    // Haptic
-    if(navigator.vibrate) navigator.vibrate(15);
-
-    // Dim the original
-    band.style.opacity = '0.35';
-
-    // Lock scroll during drag
-    document.getElementById('calband-'+day).closest('.cal-week').style.overflowX = 'hidden';
-
-  }, 350);
-}
-
-function calTouchMove(e) {
-  const dx = e.touches[0].clientX - touchStartX;
-  const dy = e.touches[0].clientY - touchStartY;
-
-  if(!touchDragging) {
-    // Cancel long press if moved too much
-    if(Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-      clearTimeout(touchLongPressTimer);
-      touchLongPressTimer = null;
-    }
-    return;
-  }
-
-  e.preventDefault();
-  const t = e.touches[0];
-
-  touchClone.style.transition = 'none';
-  touchClone.style.left = (touchInitialLeft + dx) + 'px';
-  touchClone.style.top = (touchInitialTop + dy) + 'px';
-
-  // Highlight drop target
-  document.querySelectorAll('.cal-band').forEach(b => b.classList.remove('drag-over'));
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  const target = el?.closest('.cal-band');
-  if(target && target.id !== 'calband-'+touchDragDay) {
-    target.classList.add('drag-over');
-  }
-}
-
-function calTouchEnd(e, fromDay) {
-  clearTimeout(touchLongPressTimer);
-  touchLongPressTimer = null;
-
-  // Restore scroll
-  const calWeek = document.querySelector('.cal-week');
-  if(calWeek) calWeek.style.overflowX = 'auto';
-
-  // Restore original band opacity
-  if(touchDragDay) {
-    const origBand = document.getElementById('calband-'+touchDragDay);
-    if(origBand) origBand.style.opacity = '1';
-  }
-
-  document.querySelectorAll('.cal-band').forEach(b => b.classList.remove('drag-over'));
-
-  // Remove clone
-  if(touchClone) {
-    touchClone.remove();
-    touchClone = null;
-  }
-
-  if(!touchDragging || !touchDragDay) {
-    touchDragDay = null;
-    touchDragging = false;
-    return;
-  }
-
-  // Find drop target and swap
-  const t = e.changedTouches[0];
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  const target = el?.closest('.cal-band');
-  if(target) {
-    const toDay = target.id.replace('calband-', '');
-    if(toDay !== touchDragDay) swapCalDays(touchDragDay, toDay);
-  }
-
-  touchDragDay = null;
-  touchDragging = false;
-}
 
 function removeCalDay(key) {
   calendar[key] = null;
