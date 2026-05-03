@@ -378,9 +378,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .wsd.on .wsd-bar{background:var(--red);}
 
 /* Calendar — vertical bands */
-.cal-week{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;margin-bottom:4px;perspective:800px;perspective-origin:50% 0%;padding-left:2px;padding-right:2px;}
+.cal-week{display:flex;gap:5px;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;padding-bottom:8px;margin-bottom:4px;padding-left:2px;padding-right:2px;scroll-snap-type:x proximity;}
 .cal-week::-webkit-scrollbar{display:none;}
-.cal-band{flex:0 0 120px;min-width:120px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);background:#1e1e20;transition:border-color 0.2s;cursor:pointer;touch-action:none;user-select:none;}
+.cal-week::-webkit-scrollbar{display:none;}
+.cal-band{flex:0 0 140px;min-width:140px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);background:#1e1e20;transition:border-color 0.2s;cursor:grab;user-select:none;scroll-snap-align:start;}
 .cal-band.has-workout{border-color:rgba(255,255,255,0.13);background:#26262a;}
 .cal-band.drag-over{border-color:var(--red);background:rgba(232,57,74,0.15);}
 .cal-band-header{padding:10px 6px 8px;text-align:center;border-bottom:1px solid var(--border);}
@@ -1576,7 +1577,6 @@ function calTouchStart(e, day) {
   touchStartY = e.touches[0].clientY;
   touchDragging = false;
 
-  // Long press to initiate drag (300ms)
   touchLongPressTimer = setTimeout(() => {
     touchDragDay = day;
     touchDragging = true;
@@ -1586,58 +1586,56 @@ function calTouchStart(e, day) {
     touchInitialLeft = rect.left;
     touchInitialTop = rect.top;
 
-    // Create clone
+    // Clone only the visual appearance, not interactive content
     touchClone = document.createElement('div');
-    touchClone.id = 'drag-clone-3d';
     touchClone.style.cssText = `
       position:fixed;pointer-events:none;z-index:9999;
-      width:${rect.width}px;
-      left:${rect.left}px;
-      top:${rect.top}px;
+      width:${rect.width}px;height:${rect.height}px;
+      left:${rect.left}px;top:${rect.top}px;
       border-radius:14px;
-      background:#26262a;
-      border:1.5px solid rgba(255,255,255,0.25);
+      background:#2a2a2e;
+      border:1.5px solid rgba(255,255,255,0.3);
+      box-shadow:0 20px 40px rgba(0,0,0,0.6);
       overflow:hidden;
-      will-change:transform;
+      transform:scale(1.05);
+      transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+      will-change:left,top;
     `;
+    // Copy inner HTML for visual only
     touchClone.innerHTML = band.innerHTML;
     document.body.appendChild(touchClone);
 
-    // Haptic feedback (vibrate)
-    if(navigator.vibrate) navigator.vibrate(10);
+    // Haptic
+    if(navigator.vibrate) navigator.vibrate(15);
 
-    // Lift animation
-    requestAnimationFrame(()=>{
-      touchClone.style.transition = 'transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s';
-      touchClone.style.transform = 'scale(1.06)';
-      touchClone.style.boxShadow = '0 20px 40px rgba(0,0,0,0.6), 0 0 0 1.5px rgba(255,255,255,0.2)';
-    });
+    // Dim the original
+    band.style.opacity = '0.35';
 
-    band.classList.add('dragging');
-  }, 300);
+    // Lock scroll during drag
+    document.getElementById('calband-'+day).closest('.cal-week').style.overflowX = 'hidden';
+
+  }, 350);
 }
 
 function calTouchMove(e) {
   const dx = e.touches[0].clientX - touchStartX;
   const dy = e.touches[0].clientY - touchStartY;
 
-  // Cancel long press if finger moved too much before 300ms
-  if(!touchDragging && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
-    clearTimeout(touchLongPressTimer);
-    touchLongPressTimer = null;
+  if(!touchDragging) {
+    // Cancel long press if moved too much
+    if(Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      clearTimeout(touchLongPressTimer);
+      touchLongPressTimer = null;
+    }
     return;
   }
 
-  if(!touchClone || !touchDragging) return;
   e.preventDefault();
-
   const t = e.touches[0];
 
-  // Move clone directly with finger — no rotation for cleaner mobile feel
   touchClone.style.transition = 'none';
   touchClone.style.left = (touchInitialLeft + dx) + 'px';
   touchClone.style.top = (touchInitialTop + dy) + 'px';
-  touchClone.style.transform = 'scale(1.06)';
 
   // Highlight drop target
   document.querySelectorAll('.cal-band').forEach(b => b.classList.remove('drag-over'));
@@ -1652,16 +1650,22 @@ function calTouchEnd(e, fromDay) {
   clearTimeout(touchLongPressTimer);
   touchLongPressTimer = null;
 
-  document.querySelectorAll('.cal-band').forEach(b => {
-    b.classList.remove('drag-over');
-    b.classList.remove('dragging');
-  });
+  // Restore scroll
+  const calWeek = document.querySelector('.cal-week');
+  if(calWeek) calWeek.style.overflowX = 'auto';
 
+  // Restore original band opacity
+  if(touchDragDay) {
+    const origBand = document.getElementById('calband-'+touchDragDay);
+    if(origBand) origBand.style.opacity = '1';
+  }
+
+  document.querySelectorAll('.cal-band').forEach(b => b.classList.remove('drag-over'));
+
+  // Remove clone
   if(touchClone) {
-    touchClone.style.transition = 'transform 0.15s ease, opacity 0.15s ease';
-    touchClone.style.transform = 'scale(1)';
-    touchClone.style.opacity = '0';
-    setTimeout(() => { touchClone?.remove(); touchClone = null; }, 150);
+    touchClone.remove();
+    touchClone = null;
   }
 
   if(!touchDragging || !touchDragDay) {
@@ -1670,11 +1674,12 @@ function calTouchEnd(e, fromDay) {
     return;
   }
 
+  // Find drop target and swap
   const t = e.changedTouches[0];
   const el = document.elementFromPoint(t.clientX, t.clientY);
   const target = el?.closest('.cal-band');
   if(target) {
-    const toDay = target.id.replace('calband-','');
+    const toDay = target.id.replace('calband-', '');
     if(toDay !== touchDragDay) swapCalDays(touchDragDay, toDay);
   }
 
