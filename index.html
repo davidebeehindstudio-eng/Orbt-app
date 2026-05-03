@@ -902,7 +902,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <!-- Canvas for organic water animation (below) -->
         <canvas id="water-canvas" width="300" height="360" style="position:absolute;top:0;left:0;width:140px;height:168px;z-index:1;"></canvas>
         <!-- Drop outline + text SVG (above) -->
-        <svg width="140" height="168" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;z-index:2;">
+        <!-- Drop outline SVG — vettoriale, sempre nitido -->
+        <svg width="140" height="168" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;z-index:3;pointer-events:none;">
+          <path d="M75,8 C75,8 20,75 20,115 C20,145 45,168 75,168 C105,168 130,145 130,115 C130,75 75,8 75,8 Z"
+            fill="none"
+            stroke="#60a5fa"
+            stroke-width="2"
+            stroke-linejoin="round"
+            stroke-linecap="round"/>
+        </svg>
+        <!-- Text SVG — sopra tutto -->
+        <svg width="140" height="168" viewBox="0 0 150 180" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;z-index:4;pointer-events:none;">
           <text id="drop-ml-text" x="75" y="122" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="800" font-size="22" fill="white" style="filter:drop-shadow(0 1px 4px rgba(0,0,0,0.8));">0</text>
           <text x="75" y="138" text-anchor="middle" font-family="Montserrat,sans-serif" font-weight="500" font-size="10" fill="rgba(255,255,255,0.7)" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.8));">ml</text>
         </svg>
@@ -1321,21 +1331,9 @@ function initWaterCanvas() {
 
       ctx.restore();
 
-      // Drop outline — drawn AFTER clip restore so it's always on top
-      ctx.save();
-      dropPath(ctx);
-      ctx.strokeStyle = 'rgba(96,165,250,0.9)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.restore();
+      // Outline handled by SVG layer above — do NOT draw here
     } else {
-      // Empty drop — show outline only
-      ctx.save();
-      dropPath(ctx);
-      ctx.strokeStyle = 'rgba(96,165,250,0.5)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.restore();
+      // Empty — outline handled by SVG
     }
 
     waterAnimId = requestAnimationFrame(drawWater);
